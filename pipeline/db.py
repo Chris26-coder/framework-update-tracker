@@ -56,10 +56,10 @@ def get_framework_by_slug(slug: str) -> dict[str, Any] | None:
         .table("frameworks")
         .select("*")
         .eq("slug", slug)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
-    return resp.data
+    return resp.data[0] if resp.data else None
 
 
 def update_framework_timestamps(
@@ -89,10 +89,9 @@ def get_latest_version(framework_id: str) -> dict[str, Any] | None:
         .eq("framework_id", framework_id)
         .order("fetched_at", desc=True)
         .limit(1)
-        .maybe_single()
         .execute()
     )
-    return resp.data
+    return resp.data[0] if resp.data else None
 
 
 def insert_version(
