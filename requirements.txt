@@ -1,0 +1,23 @@
+# =============================================================
+# Framework Update Tracker — Python Dependencies
+# =============================================================
+
+# ── HTTP & API ──
+httpx>=0.27,<1.0
+supabase>=2.0,<3.0
+
+# ── Config ──
+python-dotenv>=1.0,<2.0
+pyyaml>=6.0,<7.0
+
+# ── Data parsing ──
+beautifulsoup4>=4.12,<5.0
+lxml>=5.0,<6.0
+
+# ── Dev & Testing ──
+pytest>=8.0,<9.0
+pytest-asyncio>=0.23,<1.0
+ruff>=0.4,<1.0
+
+# ── LLM (optional — install only if using summaries) ──
+openai>=1.30,<2.0

@@ -1,0 +1,117 @@
+# =============================================================
+# Framework Update Tracker — Framework Registry (Local Config)
+#
+# This file supplements the database `frameworks` table.
+# It is used during development and for CI test fixtures.
+# The database seed.sql is the source of truth in production.
+# =============================================================
+
+frameworks:
+
+  # ── Tier 1: Machine-readable structured sources ──
+
+  - slug: nist-sp-800-53-r5
+    name: "NIST SP 800-53 Rev 5"
+    tier: 1
+    source_type: github_repo
+    parser_key: oscal
+    source_url: https://github.com/usnistgov/oscal-content
+    check_config:
+      repo: usnistgov/oscal-content
+      branch: main
+      path: nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json
+
+  - slug: nist-csf-2-0
+    name: "NIST Cybersecurity Framework 2.0"
+    tier: 1
+    source_type: cprt_api
+    parser_key: cprt
+    source_url: https://csrc.nist.gov/projects/cprt
+    check_config:
+      cprt_id: csf_2_0
+
+  - slug: nist-sp-800-171-r3
+    name: "NIST SP 800-171 Rev 3"
+    tier: 1
+    source_type: cprt_api
+    parser_key: cprt
+    source_url: https://csrc.nist.gov/projects/cprt
+    check_config:
+      cprt_id: sp_800_171_3_0_0
+
+  - slug: nist-ai-rmf
+    name: "NIST AI Risk Management Framework"
+    tier: 1
+    source_type: cprt_api
+    parser_key: cprt
+    source_url: https://csrc.nist.gov/projects/cprt
+    check_config:
+      cprt_id: ai_rmf_1_0
+
+  - slug: nist-privacy-framework
+    name: "NIST Privacy Framework 1.0"
+    tier: 1
+    source_type: cprt_api
+    parser_key: cprt
+    source_url: https://csrc.nist.gov/projects/cprt
+    check_config:
+      cprt_id: privacy_1_0
+
+  - slug: mitre-attack
+    name: "MITRE ATT&CK"
+    tier: 1
+    source_type: github_repo
+    parser_key: stix
+    source_url: https://github.com/mitre/cti
+    check_config:
+      repo: mitre/cti
+      branch: master
+      path: enterprise-attack
+      tag_pattern: "ATT&CK-v*"
+
+  - slug: mitre-atlas
+    name: "MITRE ATLAS"
+    tier: 1
+    source_type: github_repo
+    parser_key: atlas
+    source_url: https://github.com/mitre-atlas/atlas-data
+    check_config:
+      repo: mitre-atlas/atlas-data
+      branch: main
+      path: data/ATLASlatest.yaml
+
+  - slug: owasp-asvs-5
+    name: "OWASP ASVS 5.0"
+    tier: 1
+    source_type: github_repo
+    parser_key: asvs
+    source_url: https://github.com/OWASP/ASVS
+    check_config:
+      repo: OWASP/ASVS
+      branch: v5.0
+      path: 5.0/docs/en/OWASP_ASVS-5.0-en.csv
+      tag_pattern: "v5.*"
+
+  # ── Tier 2: Semi-structured / web-scraped sources ──
+
+  - slug: owasp-llm-top10
+    name: "OWASP Top 10 for LLM Applications"
+    tier: 2
+    source_type: web_page
+    parser_key: webpage
+    source_url: https://genai.owasp.org/llm-top-10/
+    check_config:
+      url: https://genai.owasp.org/llm-top-10/
+      selector: main
+      strip_nav: true
+
+  - slug: cis-controls-v8
+    name: "CIS Controls v8.1"
+    tier: 2
+    source_type: web_page
+    parser_key: webpage
+    source_url: https://www.cisecurity.org/controls/v8
+    check_config:
+      url: https://www.cisecurity.org/controls/v8
+      selector: .content-area
+      version_regex: "v\\d+\\.\\d+"

@@ -1,0 +1,43 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# ── Environment ──
+.env
+.env.local
+.env.*.local
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Node / Dashboard ──
+node_modules/
+dashboard/dist/
+dashboard/.vite/
+
+# ── Testing ──
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── Misc ──
+*.log
