@@ -66,7 +66,7 @@ frameworks:
     check_config:
       repo: mitre/cti
       branch: master
-      path: enterprise-attack
+      path: enterprise-attack/enterprise-attack.json
       tag_pattern: "ATT&CK-v*"
 
   - slug: mitre-atlas
@@ -78,7 +78,7 @@ frameworks:
     check_config:
       repo: mitre-atlas/atlas-data
       branch: main
-      path: data/ATLASlatest.yaml
+      path: dist/ATLAS.yaml
 
   - slug: owasp-asvs-5
     name: "OWASP ASVS 5.0"
@@ -88,8 +88,8 @@ frameworks:
     source_url: https://github.com/OWASP/ASVS
     check_config:
       repo: OWASP/ASVS
-      branch: v5.0
-      path: 5.0/docs/en/OWASP_ASVS-5.0-en.csv
+      branch: master
+      path: 5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.csv
       tag_pattern: "v5.*"
 
   # ── Tier 2: Semi-structured / web-scraped sources ──

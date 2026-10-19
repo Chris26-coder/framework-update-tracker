@@ -22,8 +22,13 @@ from .config import settings
 from .core.diff import diff_controls
 from .core.hashing import compute_hash
 from .core.normalize import normalize_controls
+from .fetchers import cprt as cprt_fetcher
 from .fetchers import github as github_fetcher
+from .parsers import asvs as asvs_parser
+from .parsers import atlas as atlas_parser
+from .parsers import cprt as cprt_parser
 from .parsers import oscal as oscal_parser
+from .parsers import stix as stix_parser
 
 logging.basicConfig(
     level=getattr(logging, settings.log_level),
@@ -36,6 +41,10 @@ logger = logging.getLogger(__name__)
 
 PARSERS: dict[str, Any] = {
     "oscal": oscal_parser.parse_oscal_catalog,
+    "cprt": cprt_parser.parse_cprt_json,
+    "stix": stix_parser.parse_stix_bundle,
+    "atlas": atlas_parser.parse_atlas_yaml,
+    "asvs": asvs_parser.parse_asvs_csv,
 }
 
 
@@ -66,6 +75,10 @@ def fetch_content(framework: dict[str, Any]) -> tuple[bytes, dict[str, Any]]:
             "commit_url": commit_info["url"],
         }
         return raw_content, metadata
+
+    if source_type == "cprt_api":
+        cprt_id = config.get("cprt_id")
+        return cprt_fetcher.fetch_cprt_framework(cprt_id)
 
     raise NotImplementedError(f"Source type not yet implemented: {source_type}")
 

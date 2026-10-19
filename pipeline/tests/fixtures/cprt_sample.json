@@ -1,0 +1,22 @@
+{
+  "elements": [
+    {
+      "elementIdentifier": "GV.OC-01",
+      "elementType": "Subcategory",
+      "title": "Organizational Context",
+      "text": "The circumstances surrounding the organization's cybersecurity risk management decisions are understood."
+    },
+    {
+      "elementIdentifier": "GV.OC-02",
+      "elementType": "Subcategory",
+      "title": "Risk Management Strategy",
+      "text": "The organization's priorities, constraints, risk tolerance, and risk appetite statements are established."
+    },
+    {
+      "elementIdentifier": "GV",
+      "elementType": "Function",
+      "title": "GOVERN",
+      "text": "The organization's cybersecurity risk management strategy, expectations, and policy are established."
+    }
+  ]
+}

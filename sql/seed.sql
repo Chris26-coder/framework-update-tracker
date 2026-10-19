@@ -59,7 +59,7 @@ VALUES
  'https://github.com/mitre/cti',
  'github_repo',
  'stix',
- '{"repo": "mitre/cti", "branch": "master", "path": "enterprise-attack", "tag_pattern": "ATT&CK-v*"}'::jsonb
+ '{"repo": "mitre/cti", "branch": "master", "path": "enterprise-attack/enterprise-attack.json", "tag_pattern": "ATT&CK-v*"}'::jsonb
 ),
 
 ('mitre-atlas',
@@ -68,7 +68,7 @@ VALUES
  'https://github.com/mitre-atlas/atlas-data',
  'github_repo',
  'atlas',
- '{"repo": "mitre-atlas/atlas-data", "branch": "main", "path": "data/ATLASlatest.yaml"}'::jsonb
+ '{"repo": "mitre-atlas/atlas-data", "branch": "main", "path": "dist/ATLAS.yaml"}'::jsonb
 ),
 
 ('owasp-asvs-5',
@@ -77,7 +77,7 @@ VALUES
  'https://github.com/OWASP/ASVS',
  'github_repo',
  'asvs',
- '{"repo": "OWASP/ASVS", "branch": "v5.0", "path": "5.0/docs/en/OWASP_ASVS-5.0-en.csv", "tag_pattern": "v5.*"}'::jsonb
+ '{"repo": "OWASP/ASVS", "branch": "master", "path": "5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.csv", "tag_pattern": "v5.*"}'::jsonb
 ),
 
 -- ── Tier 2: Semi-structured / web-scraped sources ──

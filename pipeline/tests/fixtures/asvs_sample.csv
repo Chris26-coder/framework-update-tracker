@@ -1,0 +1,4 @@
+Section,Name,Item,Description,L1,L2,L3,CWE,NIST
+V1 - Architecture,Secure Architecture,1.1.1,"Verify that a secure software development lifecycle is in use.",,,,,
+V1 - Architecture,Secure Architecture,1.1.2,"Verify that threat modeling is performed for every design change.",,,,,
+V2 - Authentication,Password Security,2.1.1,"Verify that user set passwords are at least 12 characters in length.",X,X,X,521,

@@ -1,0 +1,21 @@
+id: ATLAS
+name: Adversarial Threat Landscape for AI Systems
+version: "4.5.2"
+techniques:
+  - id: AML.T0000
+    name: ML Model Inference API Access
+    description: "Adversaries may gain access to an ML model inference API."
+    tactic-refs:
+      - AML.TA0001
+    subtechniques:
+      - id: AML.T0000.000
+        name: "Discover ML Model Family"
+        description: "Determine the type of ML model."
+      - id: AML.T0000.001
+        name: "Discover ML Model Ontology"
+        description: "Determine the ontology of an ML model."
+  - id: AML.T0001
+    name: ML Supply Chain Compromise
+    description: "Adversaries may manipulate products or product delivery mechanisms."
+    tactic-refs:
+      - AML.TA0002
