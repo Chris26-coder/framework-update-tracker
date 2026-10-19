@@ -157,15 +157,27 @@ def bulk_insert_controls(
 
 
 def get_controls_for_version(version_id: str) -> list[dict[str, Any]]:
-    """Return all controls belonging to a specific version."""
-    resp = (
-        _get_client()
-        .table("controls")
-        .select("*")
-        .eq("version_id", version_id)
-        .execute()
-    )
-    return resp.data
+    """Return all controls belonging to a specific version, paginating if >1000."""
+    client = _get_client()
+    all_controls: list[dict[str, Any]] = []
+    page_size = 1000
+    start = 0
+
+    while True:
+        resp = (
+            client.table("controls")
+            .select("*")
+            .eq("version_id", version_id)
+            .range(start, start + page_size - 1)
+            .execute()
+        )
+        data = resp.data or []
+        all_controls.extend(data)
+        if len(data) < page_size:
+            break
+        start += page_size
+
+    return all_controls
 
 
 # ===================================================================
