@@ -1,0 +1,53 @@
+name: Scheduled Pipeline — Check Framework Updates
+
+on:
+  schedule:
+    # Run once daily at 02:00 UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Framework slug to run (leave empty to run all enabled frameworks)"
+        required: false
+        default: ""
+
+jobs:
+  check-updates:
+    name: Check Framework Updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pipeline for single framework
+        if: ${{ github.event.inputs.slug != '' }}
+        run: |
+          python -m pipeline --slug "${{ github.event.inputs.slug }}"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOG_LEVEL: INFO
+
+      - name: Run pipeline for all enabled frameworks
+        if: ${{ github.event.inputs.slug == '' }}
+        run: |
+          python -m pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOG_LEVEL: INFO

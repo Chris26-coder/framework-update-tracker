@@ -87,17 +87,17 @@ VALUES
  2,
  'https://genai.owasp.org/llm-top-10/',
  'web_page',
- 'webpage',
- '{"url": "https://genai.owasp.org/llm-top-10/", "selector": "main", "strip_nav": true}'::jsonb
+ 'owasp_llm',
+ '{"url": "https://genai.owasp.org/llm-top-10/"}'::jsonb
 ),
 
 ('cis-controls-v8',
  'CIS Controls v8.1',
  2,
- 'https://www.cisecurity.org/controls/v8',
+ 'https://www.cisecurity.org/controls/cis-controls-list/',
  'web_page',
- 'webpage',
- '{"url": "https://www.cisecurity.org/controls/v8", "selector": ".content-area", "version_regex": "v\\d+\\.\\d+"}'::jsonb
+ 'cis_controls',
+ '{"url": "https://www.cisecurity.org/controls/cis-controls-list/"}'::jsonb
 )
 
 ON CONFLICT (slug) DO NOTHING;

@@ -24,11 +24,13 @@ from .core.hashing import compute_hash
 from .core.normalize import normalize_controls
 from .fetchers import cprt as cprt_fetcher
 from .fetchers import github as github_fetcher
+from .fetchers import web as web_fetcher
 from .parsers import asvs as asvs_parser
 from .parsers import atlas as atlas_parser
 from .parsers import cprt as cprt_parser
 from .parsers import oscal as oscal_parser
 from .parsers import stix as stix_parser
+from .parsers import web as web_parser
 
 logging.basicConfig(
     level=getattr(logging, settings.log_level),
@@ -45,6 +47,9 @@ PARSERS: dict[str, Any] = {
     "stix": stix_parser.parse_stix_bundle,
     "atlas": atlas_parser.parse_atlas_yaml,
     "asvs": asvs_parser.parse_asvs_csv,
+    "webpage": web_parser.parse_webpage,
+    "owasp_llm": web_parser.parse_owasp_llm,
+    "cis_controls": web_parser.parse_cis_controls,
 }
 
 
@@ -79,6 +84,11 @@ def fetch_content(framework: dict[str, Any]) -> tuple[bytes, dict[str, Any]]:
     if source_type == "cprt_api":
         cprt_id = config.get("cprt_id")
         return cprt_fetcher.fetch_cprt_framework(cprt_id)
+
+    if source_type == "web_page":
+        url = config["url"]
+        headers = config.get("headers")
+        return web_fetcher.fetch_web_page(url, headers=headers)
 
     raise NotImplementedError(f"Source type not yet implemented: {source_type}")
 
