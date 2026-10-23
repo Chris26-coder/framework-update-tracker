@@ -79,6 +79,33 @@ def _generate_heuristic_summary(
     return f"Control {control_id} was modified."
 
 
+def _extract_diff_context(old_text: str, new_text: str) -> str:
+    """Extract precise diff hunks and context around character/sentence level edits."""
+    if not old_text and not new_text:
+        return "No text provided."
+    if not old_text:
+        return f"Newly added content: {new_text[:1200]}"
+    if not new_text:
+        return f"Removed content: {old_text[:1200]}"
+
+    s = difflib.SequenceMatcher(None, old_text, new_text)
+    opcodes = [op for op in s.get_opcodes() if op[0] != "equal"]
+
+    if not opcodes:
+        return "No textual differences detected."
+
+    snippets: list[str] = []
+    for tag, i1, i2, j1, j2 in opcodes:
+        if tag == "insert":
+            snippets.append(f'Inserted text: "{new_text[j1:j2]}"')
+        elif tag == "delete":
+            snippets.append(f'Deleted text: "{old_text[i1:i2]}"')
+        elif tag == "replace":
+            snippets.append(f'Replaced "{old_text[i1:i2]}" with "{new_text[j1:j2]}"')
+
+    return "\n".join(snippets[:5])
+
+
 def summarize_change(
     change: dict[str, Any],
     *,
@@ -104,42 +131,76 @@ def summarize_change(
     if change_type == "removed":
         return _generate_heuristic_summary(change_type, control_id, diff_payload)
 
-    # For modified, check if LLM key is configured
-    key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY")
-    if not key:
+    # For modified, check if Gemini or OpenAI LLM key is configured
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    openai_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY")
+
+    if not gemini_key and not openai_key:
         return _generate_heuristic_summary(change_type, control_id, diff_payload)
 
-    try:
-        from openai import OpenAI
+    title_diff = diff_payload.get("title", {})
+    body_diff = diff_payload.get("body", {})
+    diff_context = _extract_diff_context(body_diff.get("old", ""), body_diff.get("new", ""))
 
-        client = OpenAI(api_key=key)
+    user_content = (
+        f"Control ID: {control_id}\n"
+        f"Title Old: {title_diff.get('old', 'Unchanged')}\n"
+        f"Title New: {title_diff.get('new', 'Unchanged')}\n\n"
+        f"Detected Changes:\n{diff_context}\n\n"
+        "Provide a 1-2 sentence plain-English summary of what changed:"
+    )
 
-        title_diff = diff_payload.get("title", {})
-        body_diff = diff_payload.get("body", {})
+    # 1. Try Gemini if configured
+    if gemini_key:
+        try:
+            from openai import OpenAI
 
-        user_content = (
-            f"Control ID: {control_id}\n"
-            f"Title Old: {title_diff.get('old', 'Unchanged')}\n"
-            f"Title New: {title_diff.get('new', 'Unchanged')}\n\n"
-            f"Requirement Body Old:\n{body_diff.get('old', 'Unchanged')[:2000]}\n\n"
-            f"Requirement Body New:\n{body_diff.get('new', 'Unchanged')[:2000]}\n\n"
-            "Provide a 1-2 sentence plain-English summary of what changed:"
-        )
+            client = OpenAI(
+                api_key=gemini_key,
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            )
+            model_name = os.getenv("LLM_MODEL", "gemini-3.5-flash-lite")
+            resp = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=0.0,
+                max_tokens=150,
+            )
+            content = resp.choices[0].message.content
+            if content:
+                cleaned = content.strip()
+                if control_id and control_id not in cleaned:
+                    return f"Control {control_id}: {cleaned}"
+                return cleaned
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Gemini LLM call failed (%s); trying fallback", e)
 
-        resp = client.chat.completions.create(
-            model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_content},
-            ],
-            temperature=0.0,
-            max_tokens=150,
-        )
-        content = resp.choices[0].message.content
-        if content:
-            return content.strip()
-    except Exception as e:  # noqa: BLE001 - fallback for any network/API/auth error
-        logger.warning("LLM API call failed (%s); falling back to heuristic summary", e)
+    # 2. Try OpenAI if configured
+    if openai_key:
+        try:
+            from openai import OpenAI
+
+            client = OpenAI(api_key=openai_key)
+            resp = client.chat.completions.create(
+                model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=0.0,
+                max_tokens=150,
+            )
+            content = resp.choices[0].message.content
+            if content:
+                cleaned = content.strip()
+                if control_id and control_id not in cleaned:
+                    return f"Control {control_id}: {cleaned}"
+                return cleaned
+        except Exception as e:  # noqa: BLE001
+            logger.warning("OpenAI LLM call failed (%s); falling back to heuristic summary", e)
 
     return _generate_heuristic_summary(change_type, control_id, diff_payload)
 

@@ -2,24 +2,21 @@
 Backfill plain-English summaries for changes already in Supabase.
 """
 
+import sys
 from pipeline.core.summarizer import summarize_change
 from pipeline.db import _get_client
 
 
-def backfill() -> None:
+def backfill(force: bool = False) -> None:
     client = _get_client()
-    changes = (
-        client.table("changes")
-        .select("*")
-        .is_("llm_summary", "null")
-        .execute()
-        .data
-    )
+    query = client.table("changes").select("*")
+    if not force:
+        query = query.is_("llm_summary", "null")
+    changes = query.execute().data
 
-    print(f"Found {len(changes)} changes without summaries.")
+    print(f"Found {len(changes)} changes to summarize (force={force}).")
 
     for ch in changes:
-        # Reconstruct change dict for summarizer
         change_dict = {
             "change_type": ch["change_type"],
             "control_id": ch["control_id"],
@@ -34,4 +31,5 @@ def backfill() -> None:
 
 
 if __name__ == "__main__":
-    backfill()
+    force_run = "--force" in sys.argv
+    backfill(force=force_run)
