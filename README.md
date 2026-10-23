@@ -177,27 +177,47 @@ Do NOT assume, extrapolate, or introduce outside information.
 Keep the tone objective, factual, and professional.
 ```
 
-- **When an LLM Key is Available (`OPENAI_API_KEY`):**
-  Calls `gpt-4o-mini` with temperature `0.0`, feeding only `control_id`, old text, and new text.
+- **Dual LLM Engine (Google Gemini + OpenAI):**
+  - **Google Gemini** (`gemini-3.5-flash-lite` via `GEMINI_API_KEY`): Default provider with ultra-fast inference (<1.5s per control diff), strict adherence to zero-hallucination guidelines, and character/sentence-level diff extraction.
+  - **OpenAI** (`gpt-4o-mini` via `OPENAI_API_KEY`): Secondary provider option.
 - **Graceful Offline Heuristic Fallback:**
-  When no API key is provided, the engine automatically generates deterministic, accurate summaries from the field diffs (e.g., *"Control SA-15.13 was newly added to the framework"* or *"Title changed from 'Access' to 'Access Enforcement'"*), ensuring 100% test pass rates and full offline capabilities.
+  - When no API key is provided, the engine automatically generates deterministic, accurate summaries from field diffs (e.g., *"Control SA-15.13 was newly added to the framework"* or *"Title changed from 'Access' to 'Access Enforcement'"*), ensuring 100% test pass rates and full offline capabilities.
 
 ---
 
 ## 💻 React + Vite Dashboard
 
-Located in [`dashboard/`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/). Built with React 18, Vite, TypeScript, and Lucide Icons.
+Located in [`dashboard/`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/). Built with React 18, Vite, TypeScript, Pure SVG Visualizations, and Lucide Icons.
 
-### Design System (PRD Compliant)
-- **Dark Mode by Default** (`#0B1220` deep slate, `#111A2E` surface, `#1F2A44` border) with instant light-mode toggle.
-- **Semantic Change Colors**: Green for `added`, Amber for `modified`, Red for `removed`.
-- **Typography**: Inter for interface elements, JetBrains Mono for control identifiers and diff payloads.
+### Design System & Navigation
+- **Deep Navy Slate Theme** (`#070C18` background, `#0A1224` card surface, `#141F36` borders, `#38BDF8` blue accent) with instant light-mode toggle.
+- **Fixed Left Sidebar Navigation ([`Sidebar.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/components/Sidebar.tsx))**: Brand logo with shield icon, route navigation with active states, and bottom live "System Online" monitor.
+- **Sticky Top Header ([`Header.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/components/Header.tsx))**: Global search input with `⌘ K` / `Ctrl+K` keyboard shortcut, theme toggle, and `C` user profile avatar.
 
-### Pages:
-1. **Overview Page**: High-level KPI metrics (Tracked Frameworks, Ingested Controls, Detected Changes, Health), search/tier filters, and framework overview table with "Changed Recently" indicator.
-2. **Framework Detail Page**: Metadata, source link, horizontal version history timeline, and a live controls catalog explorer with instant search and pagination.
-3. **Change Log Page**: Comprehensive version-pair diff table with filters by change type (`added`, `modified`, `removed`), search by control ID, and expandable diff cards.
-4. **Side-by-Side Diff Viewer (FR11)**: Displays grounded summary callout, title change arrows, and side-by-side columns comparing previous text vs. new text.
+### Pages & Tabs:
+1. **Dashboard Home ([`DashboardHome.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/pages/DashboardHome.tsx))**:
+   - Welcome banner with live timestamp.
+   - 4 metric KPI cards (Total Frameworks, Total Changes, Active Sources, Last Scan).
+   - Pure SVG **Framework Updates Trend** area chart with `7D`, `30D`, and `90D` period buttons.
+   - Pure SVG **Updates by Framework Category** donut chart with center count (`42`) and category breakdown legend.
+   - Recent Framework Updates feed and Frameworks Overview list.
+2. **Security Frameworks ([`FrameworksPage.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/pages/FrameworksPage.tsx))**:
+   - Tier filter chips (`All Tiers`, `Tier 1 Official`, `Tier 2 Web`, `Tier 3 Announced`).
+   - Category chips (`NIST`, `MITRE`, `OWASP`, `CIS`).
+   - Instant search bar and Grid / List view toggle.
+   - Rich framework cards with circular logos, version tags, status pills, control counts, and 30-day change badges.
+3. **Change Log & Inspector ([`ChangeLogPage.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/pages/ChangeLogPage.tsx))**:
+   - 2-Column Split Inspector view: left column scrollable update cards with diff pills (`+12`, `-3`, `~5`) and severity tags.
+   - Right column inspector with grounded Gemini summary card, change breakdown, affected control keys list, and **"View Full Change Details"** button opening the side-by-side diff modal ([`FullDiffModal.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/components/FullDiffModal.tsx)).
+4. **Application Settings ([`SettingsPage.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/pages/SettingsPage.tsx))**:
+   - Sub-tabs: `General`, `Notifications`, `Sources`, and `System`.
+   - Theme mode selector cards (`Dark`, `Light`, `System`).
+   - Preference selectors (Default View, Scan Interval).
+   - Notification switches (Email alerts, new framework alerts, critical changes only).
+   - Source switches for NIST, MITRE, OWASP, CIS, and Others.
+   - Danger zone (cache clear and system reset).
+5. **Control Drilldown Explorer ([`FrameworkDetailPage.tsx`](file:///c:/Users/chris/OneDrive/Desktop/Framework%20Update%20Tracker/dashboard/src/pages/FrameworkDetailPage.tsx))**:
+   - Version history pills and instant control-by-control search and pagination.
 5. **Runs Page**: Live audit log of all automated pipeline runs with duration in milliseconds and highlighted failure states.
 
 ---
