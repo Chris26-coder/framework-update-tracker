@@ -55,38 +55,40 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
 
   return (
     <div
+      className="theme-card"
       style={{
-        backgroundColor: '#0A1224',
-        border: '1px solid #162444',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
         borderRadius: '14px',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
         gap: '14px',
         height: '100%',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
-            <TrendingUp size={17} color="#38BDF8" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)' }}>
+            <TrendingUp size={17} color="var(--accent-primary)" />
             Framework Updates Trend
           </div>
-          <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
             Number of frameworks updated over the last 7 days
           </div>
         </div>
 
         {/* Period Selector Pills */}
-        <div style={{ display: 'flex', backgroundColor: '#070D1C', borderRadius: '8px', padding: '3px', border: '1px solid #162444' }}>
+        <div style={{ display: 'flex', backgroundColor: 'var(--bg-card-subtle)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border-card)' }}>
           {(['7D', '30D', '90D'] as const).map((p) => (
             <button
               key={p}
               onClick={() => setActivePeriod(p)}
               style={{
-                background: activePeriod === p ? '#1D4ED8' : 'transparent',
-                color: activePeriod === p ? '#FFFFFF' : '#64748B',
+                background: activePeriod === p ? 'var(--accent-blue)' : 'transparent',
+                color: activePeriod === p ? '#FFFFFF' : 'var(--text-muted)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '4px 10px',
@@ -110,11 +112,11 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
         >
           <defs>
             <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.38" />
-              <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.38" />
+              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.0" />
             </linearGradient>
             <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#38BDF8" floodOpacity="0.6" />
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#38BDF8" floodOpacity="0.5" />
             </filter>
           </defs>
 
@@ -128,7 +130,7 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
                   y1={y}
                   x2={width - paddingX}
                   y2={y}
-                  stroke="#14213D"
+                  stroke="var(--border-subtle)"
                   strokeDasharray="3 3"
                   strokeWidth="1"
                 />
@@ -136,7 +138,7 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
                   x={paddingX - 10}
                   y={y + 3}
                   textAnchor="end"
-                  fill="#475569"
+                  fill="var(--text-muted)"
                   fontSize="9"
                   fontFamily="Inter, sans-serif"
                 >
@@ -153,7 +155,7 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
           <path
             d={linePath}
             fill="none"
-            stroke="#38BDF8"
+            stroke="var(--accent-primary)"
             strokeWidth="2.5"
             strokeLinecap="round"
             filter="url(#glow)"
@@ -171,8 +173,8 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
                 cx={p.x}
                 cy={p.y}
                 r="4"
-                fill="#0A1224"
-                stroke="#38BDF8"
+                fill="var(--bg-card)"
+                stroke="var(--accent-primary)"
                 strokeWidth="2.5"
               />
               <circle
@@ -191,7 +193,7 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
               x={p.x}
               y={height - 5}
               textAnchor="middle"
-              fill="#64748B"
+              fill="var(--text-muted)"
               fontSize="10"
               fontFamily="Inter, sans-serif"
             >
@@ -208,15 +210,15 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
               left: `${(hoveredPoint.x / width) * 100}%`,
               top: `${(hoveredPoint.y / height) * 100 - 15}%`,
               transform: 'translate(-50%, -100%)',
-              backgroundColor: '#1E293B',
-              border: '1px solid #38BDF8',
+              backgroundColor: 'var(--bg-card-subtle)',
+              border: '1px solid var(--accent-primary)',
               borderRadius: '6px',
               padding: '4px 8px',
               fontSize: '11px',
               fontWeight: 600,
-              color: '#F8FAFC',
+              color: 'var(--text-primary)',
               pointerEvents: 'none',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+              boxShadow: 'var(--shadow-md)',
               whiteSpace: 'nowrap',
             }}
           >

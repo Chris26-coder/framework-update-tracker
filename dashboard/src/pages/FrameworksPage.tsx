@@ -74,10 +74,10 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10B981' }} />
           Automated • Real-time • Trusted Sources
         </div>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#F8FAFC', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
           Frameworks
         </h1>
-        <p style={{ color: '#94A3B8', marginTop: '6px', fontSize: '14px', maxWidth: '820px' }}>
+        <p style={{ color: 'var(--text-secondary)', marginTop: '6px', fontSize: '14px', maxWidth: '820px' }}>
           Track and monitor updates across NIST, MITRE, OWASP, CIS and more. Get notified when frameworks change, with detailed diff logs and clear summaries.
         </p>
       </div>
@@ -90,43 +90,43 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
           gap: '16px',
         }}
       >
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(37, 99, 235, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38BDF8' }}>
             <FileText size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>12</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Total Frameworks</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>12</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Total Frameworks</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
             <RefreshCw size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>8</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Monitored (Last 30 days)</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>8</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Monitored (Last 30 days)</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(168, 85, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A855F7' }}>
             <History size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>42</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Total Versions</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>42</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Total Versions</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4' }}>
             <Clock size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>2h ago</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Last Check</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>2h ago</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Last Check</div>
           </div>
         </div>
       </div>
@@ -139,11 +139,11 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
             style={{
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid #162444',
               borderRadius: '8px',
               padding: '8px 14px',
-              color: '#F8FAFC',
+              color: 'var(--text-heading)',
               fontSize: '13px',
               outline: 'none',
               cursor: 'pointer',
@@ -160,11 +160,11 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
             style={{
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid #162444',
               borderRadius: '8px',
               padding: '8px 14px',
-              color: '#F8FAFC',
+              color: 'var(--text-heading)',
               fontSize: '13px',
               outline: 'none',
               cursor: 'pointer',
@@ -187,11 +187,11 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                backgroundColor: '#0A1224',
+                backgroundColor: 'var(--bg-card)',
                 border: '1px solid #162444',
                 borderRadius: '8px',
                 padding: '8px 14px 8px 36px',
-                color: '#F8FAFC',
+                color: 'var(--text-heading)',
                 fontSize: '13px',
                 outline: 'none',
               }}
@@ -200,12 +200,12 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
         </div>
 
         {/* View Mode Toggle (Grid / List) */}
-        <div style={{ display: 'flex', backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '3px' }}>
+        <div style={{ display: 'flex', backgroundColor: 'var(--bg-card-subtle)', border: '1px solid #162444', borderRadius: '8px', padding: '3px' }}>
           <button
             onClick={() => setViewMode('grid')}
             style={{
               backgroundColor: viewMode === 'grid' ? '#142347' : 'transparent',
-              color: viewMode === 'grid' ? '#38BDF8' : '#64748B',
+              color: viewMode === 'grid' ? '#38BDF8' : 'var(--text-muted)',
               border: 'none',
               borderRadius: '6px',
               padding: '6px',
@@ -220,7 +220,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             onClick={() => setViewMode('list')}
             style={{
               backgroundColor: viewMode === 'list' ? '#142347' : 'transparent',
-              color: viewMode === 'list' ? '#38BDF8' : '#64748B',
+              color: viewMode === 'list' ? '#38BDF8' : 'var(--text-muted)',
               border: 'none',
               borderRadius: '6px',
               padding: '6px',
@@ -262,7 +262,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
               onClick={() => onSelectFramework(fw.slug)}
               className="framework-card"
               style={{
-                backgroundColor: '#0A1224',
+                backgroundColor: 'var(--bg-card)',
                 border: '1px solid #162444',
                 borderRadius: '14px',
                 padding: '20px',
@@ -280,10 +280,10 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                     <FrameworkLogo slug={fw.slug} name={fw.name} size={42} />
                     <div>
-                      <div style={{ fontSize: '15px', fontWeight: 600, color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {fw.name}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '2px' }}>
                         {sourceDisplay}
                       </div>
                       <div style={{ marginTop: '6px' }}>
@@ -293,7 +293,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
                           padding: '2px 8px',
                           borderRadius: '4px',
                           backgroundColor: fw.tier === 1 ? 'rgba(56, 189, 248, 0.12)' : fw.tier === 2 ? 'rgba(168, 85, 247, 0.12)' : 'rgba(100, 116, 139, 0.15)',
-                          color: fw.tier === 1 ? '#38BDF8' : fw.tier === 2 ? '#C084FC' : '#94A3B8',
+                          color: fw.tier === 1 ? '#38BDF8' : fw.tier === 2 ? '#C084FC' : 'var(--text-secondary)',
                           border: `1px solid ${fw.tier === 1 ? 'rgba(56, 189, 248, 0.25)' : fw.tier === 2 ? 'rgba(168, 85, 247, 0.25)' : 'rgba(100, 116, 139, 0.25)'}`,
                         }}>
                           {tierPill}
@@ -318,19 +318,19 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className="mono" style={{ color: '#94A3B8', fontWeight: 600 }}>
+                  <span className="mono" style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
                     {versionLabel}
                   </span>
                   <span style={{ color: '#475569' }}>•</span>
-                  <span style={{ color: '#64748B' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>
                     Last updated: 2h ago
                   </span>
                 </div>
 
                 <div>
                   {fw.tier === 3 ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#94A3B8' }}>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#64748B' }} />
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--text-muted)' }} />
                       Announcement
                     </span>
                   ) : hasUpdate ? (

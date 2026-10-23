@@ -228,14 +228,14 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '1440px', margin: '0 auto' }}>
       {/* Breadcrumb + Title */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748B', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>
           <Clock size={13} />
           Change Log
         </div>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#F8FAFC', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
           Framework <span style={{ color: '#38BDF8' }}>Change Log</span>
         </h1>
-        <p style={{ color: '#94A3B8', marginTop: '6px', fontSize: '14px' }}>
+        <p style={{ color: 'var(--text-secondary)', marginTop: '6px', fontSize: '14px' }}>
           Track all detected changes across frameworks with detailed diffs, version history and plain English summaries.
         </p>
       </div>
@@ -248,43 +248,43 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
           gap: '16px',
         }}
       >
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
             <FileText size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>42</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Total Changes (last 30 days)</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>42</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Total Changes (last 30 days)</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(37, 99, 235, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38BDF8' }}>
             <Layers size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>12</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Frameworks Updated (last 30 days)</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>12</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Frameworks Updated (last 30 days)</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(168, 85, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A855F7' }}>
             <Shield size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>8</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>Frameworks with Changes</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>8</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Frameworks with Changes</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4' }}>
             <Clock size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: '#F8FAFC' }}>2h ago</div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>NIST SP 800-53 Rev 5</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>2h ago</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>NIST SP 800-53 Rev 5</div>
           </div>
         </div>
       </div>
@@ -296,11 +296,11 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             value={frameworkFilter}
             onChange={(e) => setFrameworkFilter(e.target.value)}
             style={{
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid #162444',
               borderRadius: '8px',
               padding: '8px 14px',
-              color: '#F8FAFC',
+              color: 'var(--text-heading)',
               fontSize: '13px',
               outline: 'none',
               cursor: 'pointer',
@@ -316,11 +316,11 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             value={changeTypeFilter}
             onChange={(e) => setChangeTypeFilter(e.target.value)}
             style={{
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid #162444',
               borderRadius: '8px',
               padding: '8px 14px',
-              color: '#F8FAFC',
+              color: 'var(--text-heading)',
               fontSize: '13px',
               outline: 'none',
               cursor: 'pointer',
@@ -336,11 +336,11 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
             style={{
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid #162444',
               borderRadius: '8px',
               padding: '8px 14px',
-              color: '#F8FAFC',
+              color: 'var(--text-heading)',
               fontSize: '13px',
               outline: 'none',
               cursor: 'pointer',
@@ -361,11 +361,11 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               width: '100%',
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid #162444',
               borderRadius: '8px',
               padding: '8px 14px 8px 36px',
-              color: '#F8FAFC',
+              color: 'var(--text-heading)',
               fontSize: '13px',
               outline: 'none',
             }}
@@ -391,7 +391,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                 key={item.id}
                 onClick={() => setSelectedItemIndex(idx)}
                 style={{
-                  backgroundColor: '#0A1224',
+                  backgroundColor: 'var(--bg-card)',
                   border: isSelected ? '1.5px solid #38BDF8' : '1px solid #162444',
                   borderRadius: '12px',
                   padding: '16px 18px',
@@ -407,10 +407,10 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <FrameworkLogo slug={item.slug} name={item.name} size={32} />
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#F8FAFC' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>
                       {item.name}
                     </div>
-                    <span className="mono" style={{ fontSize: '11px', color: '#94A3B8' }}>
+                    <span className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                       {item.versionFrom} → {item.versionTo}
                     </span>
 
@@ -429,7 +429,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '11px', color: '#64748B' }}>{item.timeAgo}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.timeAgo}</span>
                     <span
                       style={{
                         fontSize: '11px',
@@ -448,7 +448,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                 </div>
 
                 {/* Subtitle / Change excerpt */}
-                <div style={{ fontSize: '12px', color: '#94A3B8', paddingLeft: '44px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '44px' }}>
                   {item.subtitle}
                 </div>
               </div>
@@ -456,16 +456,16 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
           })}
 
           {/* Pagination Controls */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 6px', fontSize: '12px', color: '#64748B' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 6px', fontSize: '12px', color: 'var(--text-muted)' }}>
             <div style={{ display: 'flex', gap: '6px' }}>
-              <button style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: '#64748B', cursor: 'pointer' }}>&lt;</button>
-              <button style={{ backgroundColor: '#1E293B', border: '1px solid #38BDF8', borderRadius: '6px', padding: '4px 8px', color: '#F8FAFC', fontWeight: 600, cursor: 'pointer' }}>1</button>
-              <button style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: '#94A3B8', cursor: 'pointer' }}>2</button>
-              <button style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: '#94A3B8', cursor: 'pointer' }}>3</button>
-              <button style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: '#94A3B8', cursor: 'pointer' }}>4</button>
-              <button style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: '#94A3B8', cursor: 'pointer' }}>5</button>
+              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-muted)', cursor: 'pointer' }}>&lt;</button>
+              <button style={{ backgroundColor: '#1E293B', border: '1px solid #38BDF8', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-heading)', fontWeight: 600, cursor: 'pointer' }}>1</button>
+              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>2</button>
+              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>3</button>
+              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>4</button>
+              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>5</button>
               <span style={{ padding: '4px' }}>...</span>
-              <button style={{ backgroundColor: '#0A1224', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: '#64748B', cursor: 'pointer' }}>&gt;</button>
+              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-muted)', cursor: 'pointer' }}>&gt;</button>
             </div>
 
             <div>
@@ -477,7 +477,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
         {/* Right Column: Detailed Change Inspector Card */}
         <div
           style={{
-            backgroundColor: '#0A1224',
+            backgroundColor: 'var(--bg-card)',
             border: '1px solid #162444',
             borderRadius: '14px',
             padding: '24px',
@@ -493,14 +493,14 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <FrameworkLogo slug={currentInspectorItem.slug} name={currentInspectorItem.name} size={40} />
               <div>
-                <div style={{ fontSize: '16px', fontWeight: 700, color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   {currentInspectorItem.name}
-                  <a href={currentInspectorItem.sourceUrl} target="_blank" rel="noreferrer" style={{ color: '#64748B' }}>
+                  <a href={currentInspectorItem.sourceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--text-muted)' }}>
                     <ExternalLink size={13} />
                   </a>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
-                  <span className="mono" style={{ fontSize: '11px', color: '#94A3B8' }}>
+                  <span className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                     {currentInspectorItem.versionFrom} → {currentInspectorItem.versionTo}
                   </span>
                   <span
@@ -519,7 +519,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
               </div>
             </div>
 
-            <span style={{ fontSize: '12px', color: '#64748B' }}>{currentInspectorItem.timeAgo}</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{currentInspectorItem.timeAgo}</span>
           </div>
 
           {/* Source & Signal Metadata */}
@@ -529,22 +529,22 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '10px 14px',
-              backgroundColor: '#070E1C',
+              backgroundColor: 'var(--bg-card-subtle)',
               borderRadius: '8px',
               border: '1px solid #14213D',
               fontSize: '12px',
             }}
           >
             <div>
-              <span style={{ color: '#64748B' }}>Source: </span>
+              <span style={{ color: 'var(--text-muted)' }}>Source: </span>
               <a href={currentInspectorItem.sourceUrl} target="_blank" rel="noreferrer" style={{ color: '#38BDF8', textDecoration: 'none', fontWeight: 500 }}>
                 {currentInspectorItem.source}
               </a>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94A3B8' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
               <span>Change Signal</span>
-              <span style={{ color: '#64748B' }}>•</span>
+              <span style={{ color: 'var(--text-muted)' }}>•</span>
               <span style={{ color: '#CBD5E1', fontFamily: 'monospace', fontSize: '11px' }}>
                 {currentInspectorItem.changeSignal}
               </span>
@@ -565,35 +565,35 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
               <FileText size={15} />
               Change Summary
             </div>
-            <div style={{ fontSize: '13px', color: '#E2E8F0', lineHeight: 1.6 }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.6 }}>
               {currentInspectorItem.summary}
             </div>
           </div>
 
           {/* Changes Breakdown */}
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
               Changes Breakdown
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
               <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#10B981' }}>{currentInspectorItem.addedCount}</div>
-                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>Added</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Added</div>
               </div>
               <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#EF4444' }}>{currentInspectorItem.removedCount}</div>
-                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>Removed</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Removed</div>
               </div>
               <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#F59E0B' }}>{currentInspectorItem.modifiedCount}</div>
-                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>Modified</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Modified</div>
               </div>
             </div>
           </div>
 
           {/* Key Changes List */}
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
               Key Changes
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -604,7 +604,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                     display: 'flex',
                     alignItems: 'baseline',
                     gap: '10px',
-                    backgroundColor: '#070E1C',
+                    backgroundColor: 'var(--bg-card-subtle)',
                     padding: '8px 12px',
                     borderRadius: '8px',
                     border: '1px solid #14213D',
@@ -625,10 +625,10 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                   >
                     {kc.type}
                   </span>
-                  <span className="mono" style={{ fontWeight: 600, color: '#F8FAFC', flexShrink: 0 }}>
+                  <span className="mono" style={{ fontWeight: 600, color: 'var(--text-heading)', flexShrink: 0 }}>
                     {kc.id}
                   </span>
-                  <span style={{ color: '#94A3B8', lineHeight: 1.4 }}>
+                  <span style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                     {kc.desc}
                   </span>
                 </div>

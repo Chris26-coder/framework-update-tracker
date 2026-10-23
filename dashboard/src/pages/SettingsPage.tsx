@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Settings, Bell, Database, Trash2, ChevronRight, Sliders, Moon, Sun, Monitor, Globe } from 'lucide-react';
+import { Settings, Bell, Database, Trash2, ChevronRight, Sliders, Moon, Sun, Monitor } from 'lucide-react';
 import { FrameworkLogo } from '../components/FrameworkLogo';
 
 interface SettingsPageProps {
-  isDark: boolean;
-  onToggleTheme: () => void;
+  themeMode: 'dark' | 'light' | 'system';
+  onSelectThemeMode: (mode: 'dark' | 'light' | 'system') => void;
 }
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({
-  isDark,
-  onToggleTheme,
+  themeMode,
+  onSelectThemeMode,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'notifications' | 'sources' | 'system'>('general');
-  const [themePreference, setThemePreference] = useState<'dark' | 'light' | 'system'>('dark');
 
   // Interactive toggle states
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -37,20 +36,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '1440px', margin: '0 auto' }}>
       {/* Title */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748B', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>
           <Settings size={13} />
           Settings
         </div>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#F8FAFC', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
           Application Settings
         </h1>
-        <p style={{ color: '#94A3B8', marginTop: '6px', fontSize: '14px' }}>
+        <p style={{ color: 'var(--text-secondary)', marginTop: '6px', fontSize: '14px' }}>
           Configure your framework sources, notifications and system preferences.
         </p>
       </div>
 
       {/* Sub-tabs Bar */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #162444', gap: '28px' }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-main)', gap: '28px' }}>
         {[
           { id: 'general', label: 'General', icon: <Sliders size={15} /> },
           { id: 'notifications', label: 'Notifications', icon: <Bell size={15} /> },
@@ -66,7 +65,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 background: 'none',
                 border: 'none',
                 padding: '12px 4px',
-                color: isActive ? '#38BDF8' : '#94A3B8',
+                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
                 fontSize: '14px',
                 fontWeight: isActive ? 600 : 500,
                 display: 'flex',
@@ -87,7 +86,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     left: 0,
                     right: 0,
                     height: '2px',
-                    backgroundColor: '#38BDF8',
+                    backgroundColor: 'var(--accent-primary)',
                     borderRadius: '2px 2px 0 0',
                   }}
                 />
@@ -110,44 +109,43 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Card 1: General Settings */}
           <div
+            className="theme-card"
             style={{
-              backgroundColor: '#0A1224',
-              border: '1px solid #162444',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
               borderRadius: '14px',
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               gap: '20px',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
             <div>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#F8FAFC' }}>General Settings</h2>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>General Settings</h2>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 Manage basic application preferences and display options.
               </p>
             </div>
 
             {/* Field: Theme */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Theme</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Theme Appearance</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Choose your preferred theme for the dashboard.
                 </div>
               </div>
 
-              {/* Segmented control */}
-              <div style={{ display: 'flex', backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '3px' }}>
+              {/* Segmented Theme Mode Control */}
+              <div style={{ display: 'flex', backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '3px', gap: '2px' }}>
                 <button
-                  onClick={() => {
-                    setThemePreference('dark');
-                    if (!isDark) onToggleTheme();
-                  }}
+                  onClick={() => onSelectThemeMode('dark')}
                   style={{
-                    backgroundColor: themePreference === 'dark' ? '#142347' : 'transparent',
-                    border: themePreference === 'dark' ? '1px solid #38BDF8' : '1px solid transparent',
-                    color: themePreference === 'dark' ? '#38BDF8' : '#94A3B8',
-                    padding: '5px 12px',
+                    backgroundColor: themeMode === 'dark' ? 'var(--bg-active)' : 'transparent',
+                    border: themeMode === 'dark' ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                    color: themeMode === 'dark' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    padding: '6px 14px',
                     borderRadius: '6px',
                     fontSize: '12px',
                     fontWeight: 600,
@@ -155,21 +153,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  <Moon size={13} />
+                  <Moon size={13} color={themeMode === 'dark' ? 'var(--accent-primary)' : undefined} />
                   Dark
                 </button>
                 <button
-                  onClick={() => {
-                    setThemePreference('light');
-                    if (isDark) onToggleTheme();
-                  }}
+                  onClick={() => onSelectThemeMode('light')}
                   style={{
-                    backgroundColor: themePreference === 'light' ? '#142347' : 'transparent',
-                    border: themePreference === 'light' ? '1px solid #38BDF8' : '1px solid transparent',
-                    color: themePreference === 'light' ? '#38BDF8' : '#94A3B8',
-                    padding: '5px 12px',
+                    backgroundColor: themeMode === 'light' ? 'var(--bg-active)' : 'transparent',
+                    border: themeMode === 'light' ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                    color: themeMode === 'light' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    padding: '6px 14px',
                     borderRadius: '6px',
                     fontSize: '12px',
                     fontWeight: 600,
@@ -177,18 +173,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  <Sun size={13} />
+                  <Sun size={13} color={themeMode === 'light' ? '#F59E0B' : undefined} />
                   Light
                 </button>
                 <button
-                  onClick={() => setThemePreference('system')}
+                  onClick={() => onSelectThemeMode('system')}
                   style={{
-                    backgroundColor: themePreference === 'system' ? '#142347' : 'transparent',
-                    border: themePreference === 'system' ? '1px solid #38BDF8' : '1px solid transparent',
-                    color: themePreference === 'system' ? '#38BDF8' : '#94A3B8',
-                    padding: '5px 12px',
+                    backgroundColor: themeMode === 'system' ? 'var(--bg-active)' : 'transparent',
+                    border: themeMode === 'system' ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                    color: themeMode === 'system' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    padding: '6px 14px',
                     borderRadius: '6px',
                     fontSize: '12px',
                     fontWeight: 600,
@@ -196,6 +193,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <Monitor size={13} />
@@ -205,14 +203,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Field: Default View */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Default View</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Default View</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Set the default view when you access the frameworks page.
                 </div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 12px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 12px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>All Frameworks</option>
                 <option>Tier 1 Only</option>
                 <option>Recently Updated</option>
@@ -220,14 +218,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Field: Items per Page */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Items per Page</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Items per Page</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Number of items to display in lists and tables.
                 </div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 16px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 16px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>10</option>
                 <option>25</option>
                 <option>50</option>
@@ -235,14 +233,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Field: Date Format */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Date Format</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Date Format</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Choose how dates are displayed throughout the application.
                 </div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 12px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 12px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>DD MMM YYYY (e.g. 26 Aug 2026)</option>
                 <option>YYYY-MM-DD</option>
                 <option>MM/DD/YYYY</option>
@@ -250,14 +248,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Field: Time Zone */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Time Zone</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Time Zone</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Set your local time zone for accurate timestamps.
                 </div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 12px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 12px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>Asia/Kolkata (GMT+5:30)</option>
                 <option>UTC (GMT+0:00)</option>
                 <option>America/New_York (EST)</option>
@@ -265,14 +263,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Field: Language */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Language</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Language</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Select your preferred language for the interface.
                 </div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 16px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 16px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>English</option>
                 <option>Español</option>
                 <option>Deutsch</option>
@@ -282,41 +280,43 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
           {/* Card 2: Data & Storage */}
           <div
+            className="theme-card"
             style={{
-              backgroundColor: '#0A1224',
-              border: '1px solid #162444',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
               borderRadius: '14px',
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               gap: '18px',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
             <div>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#F8FAFC' }}>Data & Storage</h2>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>Data & Storage</h2>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 Manage how your data is stored and handled in Supabase.
               </p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Retention Policy</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Retention Policy</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   How long to keep historical versions and change logs.
                 </div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 14px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 14px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>Keep Forever (Append-Only)</option>
                 <option>1 Year</option>
                 <option>3 Years</option>
               </select>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Data Compression</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Data Compression</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Compress stored raw catalog data to save database bandwidth (recommended).
                 </div>
               </div>
@@ -326,7 +326,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   width: '44px',
                   height: '24px',
                   borderRadius: '12px',
-                  backgroundColor: dataCompression ? '#2563EB' : '#334155',
+                  backgroundColor: dataCompression ? 'var(--accent-blue)' : '#94A3B8',
                   padding: '2px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease',
@@ -353,31 +353,33 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Card 1: Notification Settings */}
           <div
+            className="theme-card"
             style={{
-              backgroundColor: '#0A1224',
-              border: '1px solid #162444',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
               borderRadius: '14px',
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               gap: '18px',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 600, color: '#F8FAFC' }}>
-                <Bell size={18} color="#38BDF8" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                <Bell size={18} color="var(--accent-primary)" />
                 Notification Settings
               </div>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 Get notified when frameworks are updated or new changes are detected.
               </p>
             </div>
 
             {/* Email Notifications */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Email Notifications</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Receive updates via email (if configured).</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Email Notifications</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Receive updates via email (if configured).</div>
               </div>
               <div
                 onClick={() => setEmailNotifications(!emailNotifications)}
@@ -385,7 +387,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   width: '44px',
                   height: '24px',
                   borderRadius: '12px',
-                  backgroundColor: emailNotifications ? '#2563EB' : '#334155',
+                  backgroundColor: emailNotifications ? 'var(--accent-blue)' : '#94A3B8',
                   padding: '2px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease',
@@ -407,10 +409,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* New Framework Updates */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>New Framework Updates</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Notify when a new framework version is available.</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>New Framework Updates</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Notify when a new framework version is available.</div>
               </div>
               <div
                 onClick={() => setNewFrameworkUpdates(!newFrameworkUpdates)}
@@ -418,7 +420,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   width: '44px',
                   height: '24px',
                   borderRadius: '12px',
-                  backgroundColor: newFrameworkUpdates ? '#2563EB' : '#334155',
+                  backgroundColor: newFrameworkUpdates ? 'var(--accent-blue)' : '#94A3B8',
                   padding: '2px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease',
@@ -440,10 +442,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Critical Changes Only */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Critical Changes Only</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Only notify for high-priority or breaking changes.</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Critical Changes Only</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Only notify for high-priority or breaking changes.</div>
               </div>
               <div
                 onClick={() => setCriticalOnly(!criticalOnly)}
@@ -451,7 +453,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   width: '44px',
                   height: '24px',
                   borderRadius: '12px',
-                  backgroundColor: criticalOnly ? '#2563EB' : '#334155',
+                  backgroundColor: criticalOnly ? 'var(--accent-blue)' : '#94A3B8',
                   padding: '2px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease',
@@ -473,12 +475,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Summary Frequency */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #14213D' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#E2E8F0' }}>Summary Frequency</div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>How often to receive summary emails.</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Summary Frequency</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>How often to receive summary emails.</div>
               </div>
-              <select style={{ backgroundColor: '#070D1C', border: '1px solid #162444', borderRadius: '8px', padding: '6px 14px', color: '#F8FAFC', fontSize: '12px' }}>
+              <select style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-card)', borderRadius: '8px', padding: '6px 14px', color: 'var(--text-primary)', fontSize: '12px' }}>
                 <option>Daily</option>
                 <option>Weekly</option>
                 <option>Immediate</option>
@@ -488,26 +490,28 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
           {/* Card 2: Framework Source Management */}
           <div
+            className="theme-card"
             style={{
-              backgroundColor: '#0A1224',
-              border: '1px solid #162444',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
               borderRadius: '14px',
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>Framework Source Management</h2>
-                <p style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Configure which frameworks to track.</p>
+                <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)' }}>Framework Source Management</h2>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Configure which frameworks to track.</p>
               </div>
               <button
                 style={{
                   backgroundColor: 'rgba(37, 99, 235, 0.12)',
                   border: '1px solid rgba(37, 99, 235, 0.3)',
-                  color: '#38BDF8',
+                  color: 'var(--accent-primary)',
                   padding: '5px 10px',
                   borderRadius: '6px',
                   fontSize: '11px',
@@ -533,22 +537,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '10px 14px',
-                    backgroundColor: '#070E1C',
+                    backgroundColor: 'var(--bg-card-subtle)',
                     borderRadius: '8px',
-                    border: '1px solid #14213D',
+                    border: '1px solid var(--border-subtle)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <FrameworkLogo slug={src.slug} name={src.name} size={30} />
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#F8FAFC' }}>{src.name}</div>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>{src.count} frameworks</div>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>{src.name}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{src.count} frameworks</div>
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: src.active ? '#10B981' : '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: src.active ? '#10B981' : '#64748B' }} />
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: src.active ? '#10B981' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: src.active ? '#10B981' : 'var(--text-muted)' }} />
                       {src.active ? 'Active' : 'Disabled'}
                     </span>
 
@@ -558,7 +562,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                         width: '38px',
                         height: '20px',
                         borderRadius: '10px',
-                        backgroundColor: src.active ? '#2563EB' : '#334155',
+                        backgroundColor: src.active ? 'var(--accent-blue)' : '#94A3B8',
                         padding: '2px',
                         cursor: 'pointer',
                         transition: 'background-color 0.2s ease',
@@ -577,7 +581,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                         }}
                       />
                     </div>
-                    <ChevronRight size={14} color="#64748B" />
+                    <ChevronRight size={14} color="var(--text-muted)" />
                   </div>
                 </div>
               ))}
@@ -586,21 +590,23 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
           {/* Card 3: Danger Zone */}
           <div
+            className="theme-card"
             style={{
-              backgroundColor: '#0A1224',
+              backgroundColor: 'var(--bg-card)',
               border: '1px solid rgba(239, 68, 68, 0.25)',
               borderRadius: '14px',
               padding: '20px',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: '#F87171', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: '#EF4444', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 Danger Zone
               </div>
-              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 Irreversible actions. Use with caution.
               </div>
             </div>
@@ -622,7 +628,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 <Trash2 size={16} color="#EF4444" />
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: '#EF4444' }}>Clear All Data</div>
-                  <div style={{ fontSize: '11px', color: '#94A3B8' }}>This will permanently delete all stored data and logs.</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>This will permanently delete all stored data and logs.</div>
                 </div>
               </div>
               <ChevronRight size={14} color="#EF4444" />

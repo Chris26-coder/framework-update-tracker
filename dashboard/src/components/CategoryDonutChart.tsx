@@ -24,21 +24,23 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({ totalCha
 
   return (
     <div
+      className="theme-card"
       style={{
-        backgroundColor: '#0A1224',
-        border: '1px solid #162444',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
         borderRadius: '14px',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
         height: '100%',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
       {/* Header */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
-          <PieChart size={17} color="#38BDF8" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)' }}>
+          <PieChart size={17} color="var(--accent-primary)" />
           Updates by Framework Category
         </div>
       </div>
@@ -83,10 +85,10 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({ totalCha
               pointerEvents: 'none',
             }}
           >
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#F8FAFC', lineHeight: 1 }}>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)', lineHeight: 1 }}>
               {totalChanges}
             </div>
-            <div style={{ fontSize: '10px', color: '#64748B', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Total Changes
             </div>
           </div>
@@ -98,10 +100,10 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({ totalCha
             <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: cat.color }} />
-                <span style={{ color: '#E2E8F0', fontWeight: 500 }}>{cat.name}</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{cat.name}</span>
               </div>
-              <div style={{ display: 'flex', gap: '10px', color: '#94A3B8' }}>
-                <span style={{ fontWeight: 600, color: '#F8FAFC' }}>{cat.count}</span>
+              <div style={{ display: 'flex', gap: '10px', color: 'var(--text-secondary)' }}>
+                <span style={{ fontWeight: 600, color: 'var(--text-heading)' }}>{cat.count}</span>
                 <span style={{ minWidth: '28px', textAlign: 'right' }}>{cat.percent}%</span>
               </div>
             </div>

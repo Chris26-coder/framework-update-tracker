@@ -2,18 +2,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #0B1220;
-  --bg-surface: #111A2E;
-  --bg-surface-hover: #17233D;
-  --border-color: #1F2A44;
-  --border-subtle: #192338;
+  /* Dark Theme (Default) */
+  --bg-app: #070C18;
+  --bg-sidebar: #060A14;
+  --bg-header: #070C18;
+  --bg-card: #0A1224;
+  --bg-card-subtle: #0E172B;
+  --bg-card-hover: #121F3B;
+  --bg-input: #0B1324;
+  --bg-active: #142347;
+  --border-main: #141F36;
+  --border-card: #162444;
+  --border-subtle: #1F2A44;
+  --text-heading: #F8FAFC;
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
+  --accent-primary: #38BDF8;
+  --accent-blue: #2563EB;
+  --accent-glow: rgba(56, 189, 248, 0.15);
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+
+  --bg-primary: #070C18;
+  --bg-surface: #0A1224;
+  --bg-surface-hover: #121F3B;
+  --border-color: #162444;
   
-  --accent: #3B82F6;
-  --accent-hover: #2563EB;
-  --accent-light: rgba(59, 130, 246, 0.15);
+  --accent: #38BDF8;
+  --accent-hover: #0284C7;
+  --accent-light: rgba(56, 189, 248, 0.15);
   
   --color-added: #10B981;
   --color-added-bg: rgba(16, 185, 129, 0.12);
@@ -36,18 +53,35 @@
 }
 
 .light-theme {
-  --bg-primary: #F8FAFC;
+  /* Light Theme */
+  --bg-app: #F4F6F9;
+  --bg-sidebar: #FFFFFF;
+  --bg-header: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-subtle: #F8FAFC;
+  --bg-card-hover: #F1F5F9;
+  --bg-input: #FFFFFF;
+  --bg-active: #E0F2FE;
+  --border-main: #E2E8F0;
+  --border-card: #E2E8F0;
+  --border-subtle: #CBD5E1;
+  --text-heading: #0F172A;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --accent-primary: #0284C7;
+  --accent-blue: #2563EB;
+  --accent-glow: rgba(2, 132, 199, 0.12);
+  --shadow-card: 0 4px 15px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+
+  --bg-primary: #F4F6F9;
   --bg-surface: #FFFFFF;
   --bg-surface-hover: #F1F5F9;
   --border-color: #E2E8F0;
-  --border-subtle: #CBD5E1;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
   
-  --accent: #2563EB;
-  --accent-hover: #1D4ED8;
-  --accent-light: rgba(37, 99, 235, 0.08);
+  --accent: #0284C7;
+  --accent-hover: #0369A1;
+  --accent-light: rgba(2, 132, 199, 0.08);
   
   --color-added: #059669;
   --color-added-bg: rgba(16, 185, 129, 0.1);
@@ -60,6 +94,10 @@
   --color-removed: #DC2626;
   --color-removed-bg: rgba(239, 68, 68, 0.1);
   --color-removed-border: rgba(239, 68, 68, 0.25);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -324,3 +362,52 @@ tr.clickable-row:hover {
   background: rgba(16, 185, 129, 0.06);
   border: 1px solid var(--color-added-border);
 }
+
+/* ── Light Mode Core Overrides ── */
+.light-theme body,
+.light-theme .app-root {
+  background-color: var(--bg-app) !important;
+  color: var(--text-primary) !important;
+}
+
+.light-theme aside {
+  background-color: var(--bg-sidebar) !important;
+  border-right-color: var(--border-main) !important;
+}
+
+.light-theme header {
+  background-color: var(--bg-header) !important;
+  border-bottom-color: var(--border-main) !important;
+}
+
+.light-theme footer {
+  background-color: var(--bg-sidebar) !important;
+  border-top-color: var(--border-main) !important;
+  color: var(--text-muted) !important;
+}
+
+.light-theme main {
+  background-color: var(--bg-app) !important;
+}
+
+.light-theme .dashboard-stat-card,
+.light-theme .theme-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-card) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.light-theme input,
+.light-theme select {
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme h4 {
+  color: var(--text-heading) !important;
+}
+

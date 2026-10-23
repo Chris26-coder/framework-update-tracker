@@ -9,14 +9,59 @@ import { FrameworkDetailPage } from './pages/FrameworkDetailPage';
 import { FrameworkOverview, getFrameworkOverview } from './lib/api';
 
 export type ActiveTab = NavigationTab | 'detail';
+export type ThemeMode = 'dark' | 'light' | 'system';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<ActiveTab>('dashboard');
   const [selectedFrameworkSlug, setSelectedFrameworkSlug] = useState<string | null>(null);
   const [frameworks, setFrameworks] = useState<FrameworkOverview[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDark, setIsDark] = useState(true);
+  
+  // Theme state: 'dark' | 'light' | 'system' (persisted in localStorage)
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    return (localStorage.getItem('fw_tracker_theme') as ThemeMode) || 'dark';
+  });
+  const [isDark, setIsDark] = useState<boolean>(true);
   const [, setLoading] = useState(true);
+
+  // Sync theme to DOM class and localStorage
+  useEffect(() => {
+    localStorage.setItem('fw_tracker_theme', themeMode);
+
+    const applyTheme = () => {
+      let dark = true;
+      if (themeMode === 'light') {
+        dark = false;
+      } else if (themeMode === 'dark') {
+        dark = true;
+      } else if (themeMode === 'system') {
+        dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      setIsDark(dark);
+      if (dark) {
+        document.documentElement.classList.remove('light-theme');
+        document.documentElement.classList.add('dark-theme');
+      } else {
+        document.documentElement.classList.remove('dark-theme');
+        document.documentElement.classList.add('light-theme');
+      }
+    };
+
+    applyTheme();
+
+    if (themeMode === 'system') {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme();
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
+  }, [themeMode]);
+
+  // Toggle theme directly between dark and light
+  const toggleTheme = () => {
+    setThemeMode(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
 
   // Load real data from Supabase backend
   const loadData = async () => {
@@ -50,18 +95,6 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark(prev => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.remove('light-theme');
-      } else {
-        document.documentElement.classList.add('light-theme');
-      }
-      return next;
-    });
-  };
-
   const handleSelectFramework = (slug: string) => {
     setSelectedFrameworkSlug(slug);
     setCurrentTab('detail');
@@ -88,11 +121,13 @@ export function App() {
 
   return (
     <div
+      className="app-root"
       style={{
         display: 'flex',
         minHeight: '100vh',
-        backgroundColor: '#070C18',
-        color: '#F8FAFC',
+        backgroundColor: 'var(--bg-app)',
+        color: 'var(--text-primary)',
+        transition: 'background-color 0.2s ease, color 0.2s ease',
       }}
     >
       {/* Fixed Left Navigation Sidebar matching Mockups */}
@@ -110,7 +145,8 @@ export function App() {
           flexDirection: 'column',
           minWidth: 0,
           overflowX: 'hidden',
-          backgroundColor: '#070C18',
+          backgroundColor: 'var(--bg-app)',
+          transition: 'background-color 0.2s ease',
         }}
       >
         {/* Sticky Top Header matching Mockups */}
@@ -126,7 +162,8 @@ export function App() {
           style={{
             flex: 1,
             padding: '32px 36px',
-            backgroundColor: '#070C18',
+            backgroundColor: 'var(--bg-app)',
+            transition: 'background-color 0.2s ease',
           }}
         >
           {/* Tab 1: Dashboard Overview (Image 1) */}
@@ -159,8 +196,8 @@ export function App() {
           {/* Tab 4: Application Settings (Image 4) */}
           {currentTab === 'settings' && (
             <SettingsPage
-              isDark={isDark}
-              onToggleTheme={toggleTheme}
+              themeMode={themeMode}
+              onSelectThemeMode={setThemeMode}
             />
           )}
 
@@ -177,21 +214,22 @@ export function App() {
         {/* Status Footer */}
         <footer
           style={{
-            borderTop: '1px solid #141F36',
+            borderTop: '1px solid var(--border-main)',
             padding: '16px 36px',
-            backgroundColor: '#070C18',
+            backgroundColor: 'var(--bg-sidebar)',
             fontSize: '12px',
-            color: '#64748B',
+            color: 'var(--text-muted)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '12px',
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} />
-            <span>Framework Update Tracker • Production Ready v1.0.0</span>
+            <span style={{ color: 'var(--text-primary)' }}>Framework Update Tracker • Production Ready v1.0.0</span>
           </div>
           <div style={{ display: 'flex', gap: '20px' }}>
             <span>Append-Only Version History</span>

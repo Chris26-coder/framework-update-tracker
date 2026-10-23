@@ -26,8 +26,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       style={{
         width: '240px',
         minWidth: '240px',
-        backgroundColor: '#070C18',
-        borderRight: '1px solid #141F36',
+        backgroundColor: 'var(--bg-sidebar)',
+        borderRight: '1px solid var(--border-main)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -36,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         position: 'sticky',
         top: 0,
         zIndex: 50,
+        transition: 'background-color 0.2s ease, border-color 0.2s ease',
       }}
     >
       {/* Top Brand & Nav */}
@@ -65,8 +66,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <ShieldAlert size={20} color="#FFFFFF" />
           </div>
-          <div style={{ fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: '#F8FAFC' }}>
-            Framework<span style={{ color: '#38BDF8' }}>Tracker</span>
+          <div style={{ fontSize: '17px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-heading)' }}>
+            Framework<span style={{ color: 'var(--accent-primary)' }}>Tracker</span>
           </div>
         </div>
 
@@ -85,8 +86,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   padding: '11px 16px',
                   borderRadius: '10px',
                   border: 'none',
-                  backgroundColor: isActive ? '#142347' : 'transparent',
-                  color: isActive ? '#38BDF8' : '#94A3B8',
+                  backgroundColor: isActive ? 'var(--bg-active)' : 'transparent',
+                  color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
                   fontSize: '14px',
                   fontWeight: isActive ? 600 : 500,
                   cursor: 'pointer',
@@ -96,18 +97,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.backgroundColor = '#0F1A30';
-                    e.currentTarget.style.color = '#F1F5F9';
+                    e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#94A3B8';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
                   }
                 }}
               >
-                <span style={{ color: isActive ? '#38BDF8' : '#64748B' }}>
+                <span style={{ color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
                   {item.icon}
                 </span>
                 {item.label}
@@ -122,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       bottom: '8px',
                       width: '3px',
                       borderRadius: '0 4px 4px 0',
-                      backgroundColor: '#38BDF8',
+                      backgroundColor: 'var(--accent-primary)',
                     }}
                   />
                 )}
@@ -135,8 +136,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Bottom Status Card */}
       <div
         style={{
-          backgroundColor: '#0B1324',
-          border: '1px solid #162442',
+          backgroundColor: 'var(--bg-card-subtle)',
+          border: '1px solid var(--border-card)',
           borderRadius: '12px',
           padding: '14px 16px',
           display: 'flex',
@@ -159,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             System Online
           </span>
         </div>
-        <div style={{ fontSize: '11px', color: '#64748B', paddingLeft: '16px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', paddingLeft: '16px' }}>
           Last checked: {lastCheckedText}
         </div>
       </div>

@@ -18,8 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       style={{
         height: '68px',
-        backgroundColor: '#070C18',
-        borderBottom: '1px solid #141F36',
+        backgroundColor: 'var(--bg-header)',
+        borderBottom: '1px solid var(--border-main)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -27,13 +27,14 @@ export const Header: React.FC<HeaderProps> = ({
         position: 'sticky',
         top: 0,
         zIndex: 40,
+        transition: 'background-color 0.2s ease, border-color 0.2s ease',
       }}
     >
       {/* Search Input with ⌘ K */}
       <div style={{ position: 'relative', width: '420px', maxWidth: '60%' }}>
         <Search
           size={16}
-          color="#64748B"
+          color="var(--text-muted)"
           style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
         />
         <input
@@ -43,21 +44,21 @@ export const Header: React.FC<HeaderProps> = ({
           onChange={(e) => onSearchChange(e.target.value)}
           style={{
             width: '100%',
-            backgroundColor: '#0B1324',
-            border: '1px solid #172444',
+            backgroundColor: 'var(--bg-input)',
+            border: '1px solid var(--border-card)',
             borderRadius: '10px',
             padding: '9px 44px 9px 38px',
-            color: '#F8FAFC',
+            color: 'var(--text-primary)',
             fontSize: '13px',
             outline: 'none',
-            transition: 'border-color 0.15s ease',
+            transition: 'border-color 0.15s ease, background-color 0.2s ease, color 0.2s ease',
           }}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = '#3B82F6';
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+            e.currentTarget.style.borderColor = 'var(--accent-primary)';
+            e.currentTarget.style.boxShadow = '0 0 0 2px var(--accent-glow)';
           }}
           onBlur={(e) => {
-            e.currentTarget.style.borderColor = '#172444';
+            e.currentTarget.style.borderColor = 'var(--border-card)';
             e.currentTarget.style.boxShadow = 'none';
           }}
         />
@@ -67,12 +68,12 @@ export const Header: React.FC<HeaderProps> = ({
             right: '10px',
             top: '50%',
             transform: 'translateY(-50%)',
-            backgroundColor: '#121F3B',
-            border: '1px solid #1E2F52',
+            backgroundColor: 'var(--bg-card-subtle)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '5px',
             padding: '2px 6px',
             fontSize: '10px',
-            color: '#94A3B8',
+            color: 'var(--text-muted)',
             fontFamily: 'monospace',
             fontWeight: 600,
             pointerEvents: 'none',
@@ -84,32 +85,44 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {/* Theme Toggle */}
+        {/* Night / Light Mode Toggle Button */}
         <button
           onClick={onToggleTheme}
           style={{
-            background: 'none',
-            border: 'none',
-            color: '#94A3B8',
+            background: 'var(--bg-card-subtle)',
+            border: '1px solid var(--border-card)',
+            color: 'var(--text-secondary)',
             cursor: 'pointer',
-            padding: '8px',
-            borderRadius: '8px',
+            padding: '8px 12px',
+            borderRadius: '9px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'color 0.15s ease, background-color 0.15s ease',
+            gap: '8px',
+            fontSize: '13px',
+            fontWeight: 500,
+            transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#0F1A30';
-            e.currentTarget.style.color = '#F1F5F9';
+            e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+            e.currentTarget.style.color = 'var(--text-primary)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = '#94A3B8';
+            e.currentTarget.style.backgroundColor = 'var(--bg-card-subtle)';
+            e.currentTarget.style.color = 'var(--text-secondary)';
           }}
-          title="Toggle light / dark theme"
+          title={isDark ? "Switch to Light Mode" : "Switch to Night Mode"}
         >
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          {isDark ? (
+            <>
+              <Sun size={17} color="#F59E0B" />
+              <span>Light Mode</span>
+            </>
+          ) : (
+            <>
+              <Moon size={17} color="#6366F1" />
+              <span>Night Mode</span>
+            </>
+          )}
         </button>
 
         {/* User Profile Avatar (Chris) */}
@@ -118,16 +131,16 @@ export const Header: React.FC<HeaderProps> = ({
             width: '36px',
             height: '36px',
             borderRadius: '50%',
-            backgroundColor: '#1E293B',
-            border: '1.5px solid #334155',
-            color: '#F8FAFC',
+            backgroundColor: 'var(--bg-card-subtle)',
+            border: '1.5px solid var(--border-card)',
+            color: 'var(--text-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 600,
             fontSize: '14px',
             cursor: 'pointer',
-            boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
+            boxShadow: 'var(--shadow-sm)',
           }}
           title="Chris (Administrator)"
         >

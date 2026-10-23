@@ -58,10 +58,10 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#F8FAFC' }}>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>
               Full Control Diff Details — {frameworkName}
             </div>
-            <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
               Side-by-side verification of modified controls, requirements prose, and additions
             </div>
           </div>
@@ -71,7 +71,7 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: '#94A3B8',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               padding: '6px',
               borderRadius: '8px',
@@ -92,7 +92,7 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
               <div
                 key={ch.id}
                 style={{
-                  backgroundColor: '#070E1C',
+                  backgroundColor: 'var(--bg-card-subtle)',
                   border: '1px solid #162444',
                   borderRadius: '12px',
                   padding: '18px',
@@ -133,7 +133,7 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
                     </span>
                   </div>
 
-                  <span style={{ fontSize: '12px', color: '#64748B' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                     {new Date(ch.detected_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
@@ -150,7 +150,7 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
                       alignItems: 'flex-start',
                       gap: '8px',
                       fontSize: '13px',
-                      color: '#E2E8F0',
+                      color: 'var(--text-primary)',
                     }}
                   >
                     <Sparkles size={15} color="#3B82F6" style={{ marginTop: '2px', flexShrink: 0 }} />
@@ -161,7 +161,7 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
                 {/* Title Diff */}
                 {titleDiff && (
                   <div style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: '#94A3B8' }}>Title:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Title:</span>
                     <span style={{ textDecoration: 'line-through', color: '#F87171' }}>{titleDiff.old}</span>
                     <ArrowRight size={14} color="#64748B" />
                     <span style={{ color: '#34D399', fontWeight: 600 }}>{titleDiff.new}</span>
@@ -186,7 +186,7 @@ export const FullDiffModal: React.FC<FullDiffModalProps> = ({
                         <PlusCircle size={13} />
                         Current Version Text
                       </div>
-                      <div style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#F8FAFC' }}>
+                      <div style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: 'var(--text-heading)' }}>
                         {bodyDiff ? bodyDiff.new : (ch.after_text || 'No new text')}
                       </div>
                     </div>
