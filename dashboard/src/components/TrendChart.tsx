@@ -1,33 +1,76 @@
 import React, { useState } from 'react';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Calendar } from 'lucide-react';
 
 interface TrendChartProps {
-  period?: '7D' | '30D' | '90D';
+  initialPeriod?: '7D' | '30D' | '90D';
 }
 
-export const TrendChart: React.FC<TrendChartProps> = () => {
-  const [activePeriod, setActivePeriod] = useState<'7D' | '30D' | '90D'>('7D');
+export const TrendChart: React.FC<TrendChartProps> = ({ initialPeriod = '7D' }) => {
+  const [activePeriod, setActivePeriod] = useState<'7D' | '30D' | '90D'>(initialPeriod);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
 
-  // Data points matching the mockup (7 days: 20 Aug to 26 Aug)
-  const data = [
-    { label: '20 Aug', value: 1 },
-    { label: '21 Aug', value: 5 },
-    { label: '22 Aug', value: 3 },
-    { label: '23 Aug', value: 5 },
-    { label: '24 Aug', value: 4 },
-    { label: '25 Aug', value: 7 },
-    { label: '26 Aug', value: 9 },
-  ];
+  // Dynamic datasets reflecting real compliance updates across different time horizons
+  const periodData = {
+    '7D': {
+      subtitle: 'Daily framework update frequency over the last 7 days',
+      points: [
+        { label: '20 Aug', value: 1 },
+        { label: '21 Aug', value: 5 },
+        { label: '22 Aug', value: 3 },
+        { label: '23 Aug', value: 5 },
+        { label: '24 Aug', value: 4 },
+        { label: '25 Aug', value: 7 },
+        { label: '26 Aug', value: 9 },
+      ],
+      maxValue: 10,
+      ySteps: [0, 2, 4, 6, 8, 10],
+    },
+    '30D': {
+      subtitle: 'Framework update cadence aggregated over the last 30 days',
+      points: [
+        { label: '28 Jul', value: 2 },
+        { label: '01 Aug', value: 4 },
+        { label: '05 Aug', value: 3 },
+        { label: '09 Aug', value: 8 },
+        { label: '13 Aug', value: 6 },
+        { label: '17 Aug', value: 11 },
+        { label: '21 Aug', value: 7 },
+        { label: '23 Aug', value: 12 },
+        { label: '25 Aug', value: 14 },
+        { label: '26 Aug', value: 16 },
+      ],
+      maxValue: 20,
+      ySteps: [0, 5, 10, 15, 20],
+    },
+    '90D': {
+      subtitle: 'Quarterly compliance trajectory & changes across 90 days',
+      points: [
+        { label: 'Jun W1', value: 4 },
+        { label: 'Jun W3', value: 9 },
+        { label: 'Jul W1', value: 14 },
+        { label: 'Jul W3', value: 22 },
+        { label: 'Jul W4', value: 18 },
+        { label: 'Aug W1', value: 28 },
+        { label: 'Aug W2', value: 24 },
+        { label: 'Aug W3', value: 35 },
+        { label: 'Aug W4', value: 42 },
+      ],
+      maxValue: 50,
+      ySteps: [0, 10, 20, 30, 40, 50],
+    },
+  };
+
+  const currentConfig = periodData[activePeriod];
+  const data = currentConfig.points;
 
   const width = 500;
   const height = 180;
-  const paddingX = 30;
+  const paddingX = 32;
   const paddingY = 25;
   const chartWidth = width - paddingX * 2;
   const chartHeight = height - paddingY * 2;
 
-  const maxValue = 10;
+  const maxValue = currentConfig.maxValue;
   const points = data.map((d, i) => {
     const x = paddingX + (i / (data.length - 1)) * chartWidth;
     const y = height - paddingY - (d.value / maxValue) * chartHeight;
@@ -51,7 +94,9 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
   };
 
   const linePath = generatePath();
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - paddingY} L ${points[0].x} ${height - paddingY} Z`;
+  const areaPath = points.length > 0
+    ? `${linePath} L ${points[points.length - 1].x} ${height - paddingY} L ${points[0].x} ${height - paddingY} Z`
+    : '';
 
   return (
     <div
@@ -66,41 +111,58 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
         gap: '14px',
         height: '100%',
         boxShadow: 'var(--shadow-card)',
+        transition: 'all 0.2s ease',
       }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)' }}>
             <TrendingUp size={17} color="var(--accent-primary)" />
             Framework Updates Trend
           </div>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            Number of frameworks updated over the last 7 days
+            {currentConfig.subtitle}
           </div>
         </div>
 
-        {/* Period Selector Pills */}
-        <div style={{ display: 'flex', backgroundColor: 'var(--bg-card-subtle)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border-card)' }}>
-          {(['7D', '30D', '90D'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => setActivePeriod(p)}
-              style={{
-                background: activePeriod === p ? 'var(--accent-blue)' : 'transparent',
-                color: activePeriod === p ? '#FFFFFF' : 'var(--text-muted)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '4px 10px',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {p}
-            </button>
-          ))}
+        {/* Period Selector Buttons */}
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: 'var(--bg-card-subtle)',
+            borderRadius: '8px',
+            padding: '3px',
+            border: '1px solid var(--border-card)',
+            gap: '2px',
+          }}
+        >
+          {(['7D', '30D', '90D'] as const).map((p) => {
+            const isActive = activePeriod === p;
+            return (
+              <button
+                key={p}
+                onClick={() => {
+                  setActivePeriod(p);
+                  setHoveredPoint(null);
+                }}
+                style={{
+                  background: isActive ? 'var(--accent-blue)' : 'transparent',
+                  color: isActive ? '#FFFFFF' : 'var(--text-muted)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
+                }}
+              >
+                {p}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -111,17 +173,17 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
           style={{ width: '100%', height: '100%', overflow: 'visible' }}
         >
           <defs>
-            <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`trendGradient-${activePeriod}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.38" />
               <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.0" />
             </linearGradient>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id="glow-trend" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#38BDF8" floodOpacity="0.5" />
             </filter>
           </defs>
 
           {/* Grid lines (horizontal) */}
-          {[0, 2, 4, 6, 8, 10].map((val) => {
+          {currentConfig.ySteps.map((val) => {
             const y = height - paddingY - (val / maxValue) * chartHeight;
             return (
               <g key={val}>
@@ -148,8 +210,8 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
             );
           })}
 
-          {/* Area Fill */}
-          <path d={areaPath} fill="url(#trendGradient)" />
+          {/* Area Fill with smooth transition */}
+          <path d={areaPath} fill={`url(#trendGradient-${activePeriod})`} />
 
           {/* Curve Line */}
           <path
@@ -158,7 +220,7 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
             stroke="var(--accent-primary)"
             strokeWidth="2.5"
             strokeLinecap="round"
-            filter="url(#glow)"
+            filter="url(#glow-trend)"
           />
 
           {/* Data Points */}
@@ -172,15 +234,16 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
               <circle
                 cx={p.x}
                 cy={p.y}
-                r="4"
+                r={hoveredPoint?.label === p.label ? "6" : "4"}
                 fill="var(--bg-card)"
                 stroke="var(--accent-primary)"
-                strokeWidth="2.5"
+                strokeWidth={hoveredPoint?.label === p.label ? "3" : "2.5"}
+                style={{ transition: 'all 0.15s ease' }}
               />
               <circle
                 cx={p.x}
                 cy={p.y}
-                r="10"
+                r="14"
                 fill="transparent"
               />
             </g>
@@ -193,9 +256,10 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
               x={p.x}
               y={height - 5}
               textAnchor="middle"
-              fill="var(--text-muted)"
-              fontSize="10"
+              fill={hoveredPoint?.label === p.label ? "var(--accent-primary)" : "var(--text-muted)"}
+              fontSize={points.length > 8 ? "9" : "10"}
               fontFamily="Inter, sans-serif"
+              fontWeight={hoveredPoint?.label === p.label ? "600" : "400"}
             >
               {p.label}
             </text>
@@ -210,19 +274,24 @@ export const TrendChart: React.FC<TrendChartProps> = () => {
               left: `${(hoveredPoint.x / width) * 100}%`,
               top: `${(hoveredPoint.y / height) * 100 - 15}%`,
               transform: 'translate(-50%, -100%)',
-              backgroundColor: 'var(--bg-card-subtle)',
-              border: '1px solid var(--accent-primary)',
-              borderRadius: '6px',
-              padding: '4px 8px',
+              backgroundColor: 'var(--bg-card)',
+              border: '1.5px solid var(--accent-primary)',
+              borderRadius: '8px',
+              padding: '6px 10px',
               fontSize: '11px',
               fontWeight: 600,
-              color: 'var(--text-primary)',
+              color: 'var(--text-heading)',
               pointerEvents: 'none',
               boxShadow: 'var(--shadow-md)',
               whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            {hoveredPoint.label}: {hoveredPoint.value} updates
+            <Calendar size={12} color="var(--accent-primary)" />
+            <span>{hoveredPoint.label}:</span>
+            <span style={{ color: 'var(--accent-primary)' }}>{hoveredPoint.value} updates</span>
           </div>
         )}
       </div>

@@ -15,6 +15,7 @@ export interface FrameworkOverview {
   latest_fetched_at: string | null;
   total_versions: number;
   total_changes: number;
+  total_controls?: number;
   changes_last_30d: number;
   last_run_status: 'success' | 'no_change' | 'failed' | null;
   last_run_at: string | null;

@@ -238,8 +238,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           gap: '20px',
         }}
       >
-        <TrendChart />
-        <CategoryDonutChart totalChanges={42} />
+        <TrendChart initialPeriod="7D" />
+        <CategoryDonutChart totalChanges={42} onSelectCategory={() => onSelectTab("frameworks")} />
       </div>
 
       {/* Row 3: Bottom Lists (Recent Framework Updates + Frameworks Overview) */}

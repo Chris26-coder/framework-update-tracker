@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FrameworkLogo } from '../components/FrameworkLogo';
 import { FullDiffModal } from '../components/FullDiffModal';
 import { ChangeRecord, FrameworkOverview, getChanges } from '../lib/api';
-import { Clock, Search, ChevronRight, ExternalLink, Code, Layers, Shield, FileText } from 'lucide-react';
+import { Clock, Search, ChevronRight, ExternalLink, Code, Layers, Shield, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface ChangeLogPageProps {
   frameworks: FrameworkOverview[];
@@ -22,6 +22,8 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
   const [changeTypeFilter, setChangeTypeFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('30d');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => {
     if (initialFrameworkSlug) {
@@ -41,8 +43,8 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
     loadData();
   }, []);
 
-  // Pre-configured change cards matching Image 3 mockup
-  const mockUpdates = [
+  // Pre-configured change records matching the PRD and UI mockups
+  const allUpdates = [
     {
       id: 'nist-800-53',
       slug: 'nist-sp-800-53-r5',
@@ -52,20 +54,22 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       changeSignal: 'New commit to catalog file',
       versionFrom: 'v5.1.0',
       versionTo: 'v5.1.1',
-      addedCount: 12,
-      removedCount: 3,
+      addedCount: 3,
+      removedCount: 0,
       modifiedCount: 5,
       timeAgo: '2h ago',
+      daysAgo: 0,
       severity: 'Major Update',
       severityColor: '#818CF8',
-      summary: '12 new controls were added, 3 controls were removed, and 5 were modified in NIST SP 800-53 Rev 5. This update includes new controls for AI governance, enhanced supply chain security requirements, and updated control mappings.',
+      summary: 'Control SA-4 and SI-2 updated to establish additional developer responsibilities and controlled patching environments. New controls SA-15.13, SA-24, and SI-2.7 added to catalog.',
       subtitle: 'Added new controls for AI governance and updated control mappings.',
       keyChanges: [
-        { type: 'added', id: 'AC-7(21)', desc: 'New control for AI system inventory and governance.' },
-        { type: 'added', id: 'SC-12(7)', desc: 'Added requirement for supply chain risk management.' },
-        { type: 'removed', id: 'IR-4(3)', desc: 'Deprecated control for legacy systems.' },
-        { type: 'modified', id: 'AU-6(4)', desc: 'Updated logging requirements for cloud environments.' },
-        { type: 'modified', id: 'SI-4(8)', desc: 'Enhanced guidance for system monitoring.' },
+        { type: 'added', id: 'SA-15.13', desc: 'Critical Software Analysis and developer verification.' },
+        { type: 'added', id: 'SA-24', desc: 'Hardware, Software, and Firmware Authenticity.' },
+        { type: 'added', id: 'SI-2.7', desc: 'Automated Flaw Remediation testing and verification.' },
+        { type: 'modified', id: 'SA-4', desc: 'Organizations can now establish additional security and operational requirements.' },
+        { type: 'modified', id: 'SI-2', desc: 'Controlled patching environment and verification of software updates.' },
+        { type: 'modified', id: 'SI-2.5', desc: 'Implementation of staggered deployment strategy for flaw remediation.' },
       ],
     },
     {
@@ -81,6 +85,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       removedCount: 1,
       modifiedCount: 2,
       timeAgo: '5h ago',
+      daysAgo: 0,
       severity: 'Medium',
       severityColor: '#F59E0B',
       summary: '4 new enterprise attack techniques added, 1 subtechnique deprecated, and 2 techniques updated with additional cloud and identity detection analytics.',
@@ -104,6 +109,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       removedCount: 0,
       modifiedCount: 1,
       timeAgo: '1d ago',
+      daysAgo: 1,
       severity: 'Low',
       severityColor: '#34D399',
       summary: 'Updated risk documentation and mitigations for prompt injection and sensitive information leakage in GenAI applications.',
@@ -118,14 +124,15 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       slug: 'cis-controls-v8',
       name: 'CIS Controls v8.1',
       source: 'cisecurity.org',
-      sourceUrl: 'https://www.cisecurity.org/controls/cis-controls-list/',
-      changeSignal: 'Version string on page',
-      versionFrom: 'v8.1',
-      versionTo: 'v8.2',
-      addedCount: 6,
-      removedCount: 2,
-      modifiedCount: 3,
+      sourceUrl: 'https://www.cisecurity.org/controls',
+      changeSignal: 'Document revision',
+      versionFrom: 'v8.0',
+      versionTo: 'v8.1',
+      addedCount: 3,
+      removedCount: 0,
+      modifiedCount: 2,
       timeAgo: '2d ago',
+      daysAgo: 2,
       severity: 'Medium',
       severityColor: '#F59E0B',
       summary: 'Refined control descriptions, added guidance for SaaS asset tracking, and streamlined implementation safeguards.',
@@ -148,6 +155,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       removedCount: 1,
       modifiedCount: 4,
       timeAgo: '3d ago',
+      daysAgo: 3,
       severity: 'Medium',
       severityColor: '#F59E0B',
       summary: 'Updated references, clarified requirement language, and aligned with SP 800-53 Rev 5 control baselines.',
@@ -170,6 +178,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       removedCount: 0,
       modifiedCount: 1,
       timeAgo: '6d ago',
+      daysAgo: 6,
       severity: 'Low',
       severityColor: '#34D399',
       summary: 'New adversarial ML techniques added for LLM jailbreaking and model evasion.',
@@ -191,6 +200,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       removedCount: 4,
       modifiedCount: 2,
       timeAgo: '1w ago',
+      daysAgo: 7,
       severity: 'Medium',
       severityColor: '#F59E0B',
       summary: 'Updated verification requirements for authentication and session management in modern SPAs.',
@@ -211,7 +221,8 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       addedCount: 5,
       removedCount: 1,
       modifiedCount: 2,
-      timeAgo: '1w ago',
+      timeAgo: '12d ago',
+      daysAgo: 12,
       severity: 'Low',
       severityColor: '#34D399',
       summary: 'Added crosswalk guidance for generative AI risk management and red-teaming methodologies.',
@@ -222,7 +233,47 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
     },
   ];
 
-  const currentInspectorItem = mockUpdates[selectedItemIndex] || mockUpdates[0];
+  // Apply filters
+  const filteredUpdates = allUpdates.filter((item) => {
+    // 1. Framework filter
+    if (frameworkFilter !== 'all' && item.slug !== frameworkFilter) return false;
+
+    // 2. Change Type filter
+    if (changeTypeFilter === 'added' && item.addedCount === 0) return false;
+    if (changeTypeFilter === 'modified' && item.modifiedCount === 0) return false;
+    if (changeTypeFilter === 'removed' && item.removedCount === 0) return false;
+
+    // 3. Time filter
+    if (timeFilter === '7d' && item.daysAgo > 7) return false;
+    if (timeFilter === '30d' && item.daysAgo > 30) return false;
+    if (timeFilter === '90d' && item.daysAgo > 90) return false;
+
+    // 4. Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = item.name.toLowerCase().includes(q);
+      const matchesSummary = item.summary.toLowerCase().includes(q);
+      const matchesSubtitle = item.subtitle.toLowerCase().includes(q);
+      const matchesKey = item.keyChanges.some(
+        (k) => k.id.toLowerCase().includes(q) || k.desc.toLowerCase().includes(q)
+      );
+      if (!matchesName && !matchesSummary && !matchesSubtitle && !matchesKey) return false;
+    }
+
+    return true;
+  });
+
+  // Current inspector target
+  const currentInspectorItem = filteredUpdates[selectedItemIndex] || filteredUpdates[0] || allUpdates[0];
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredUpdates.length / pageSize) || 1;
+  const paginatedUpdates = filteredUpdates.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSelectFrameworkItem = (idxInPage: number) => {
+    const globalIdx = (currentPage - 1) * pageSize + idxInPage;
+    setSelectedItemIndex(globalIdx);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '1440px', margin: '0 auto' }}>
@@ -233,10 +284,10 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
           Change Log
         </div>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
-          Framework <span style={{ color: '#38BDF8' }}>Change Log</span>
+          Framework <span style={{ color: 'var(--accent-primary)' }}>Change Log</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: '6px', fontSize: '14px' }}>
-          Track all detected changes across frameworks with detailed diffs, version history and plain English summaries.
+          Track all detected changes across frameworks with detailed diffs, version history and plain-English AI summaries.
         </p>
       </div>
 
@@ -248,7 +299,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
           gap: '16px',
         }}
       >
-        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="theme-card" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: 'var(--shadow-card)' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
             <FileText size={20} />
           </div>
@@ -258,33 +309,33 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
           </div>
         </div>
 
-        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(37, 99, 235, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38BDF8' }}>
+        <div className="theme-card" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
             <Layers size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>12</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Frameworks Updated (last 30 days)</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{filteredUpdates.length}</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Matching Filtered Results</div>
           </div>
         </div>
 
-        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(168, 85, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A855F7' }}>
+        <div className="theme-card" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F59E0B' }}>
+            <Code size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>17</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Modified Controls</div>
+          </div>
+        </div>
+
+        <div className="theme-card" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818CF8' }}>
             <Shield size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>8</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Frameworks with Changes</div>
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4' }}>
-            <Clock size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>2h ago</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>NIST SP 800-53 Rev 5</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>25</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Added Controls</div>
           </div>
         </div>
       </div>
@@ -292,12 +343,17 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       {/* Filter and Search Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Framework Filter */}
           <select
             value={frameworkFilter}
-            onChange={(e) => setFrameworkFilter(e.target.value)}
+            onChange={(e) => {
+              setFrameworkFilter(e.target.value);
+              setSelectedItemIndex(0);
+              setCurrentPage(1);
+            }}
             style={{
               backgroundColor: 'var(--bg-card)',
-              border: '1px solid #162444',
+              border: '1px solid var(--border-card)',
               borderRadius: '8px',
               padding: '8px 14px',
               color: 'var(--text-heading)',
@@ -307,17 +363,24 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             }}
           >
             <option value="all">All Frameworks</option>
-            {mockUpdates.map(u => (
-              <option key={u.id} value={u.slug}>{u.name}</option>
+            {allUpdates.map((u) => (
+              <option key={u.id} value={u.slug}>
+                {u.name}
+              </option>
             ))}
           </select>
 
+          {/* Change Type Filter */}
           <select
             value={changeTypeFilter}
-            onChange={(e) => setChangeTypeFilter(e.target.value)}
+            onChange={(e) => {
+              setChangeTypeFilter(e.target.value);
+              setSelectedItemIndex(0);
+              setCurrentPage(1);
+            }}
             style={{
               backgroundColor: 'var(--bg-card)',
-              border: '1px solid #162444',
+              border: '1px solid var(--border-card)',
               borderRadius: '8px',
               padding: '8px 14px',
               color: 'var(--text-heading)',
@@ -327,17 +390,22 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             }}
           >
             <option value="all">All Change Types</option>
-            <option value="added">Added</option>
-            <option value="modified">Modified</option>
-            <option value="removed">Removed</option>
+            <option value="added">Added (+)</option>
+            <option value="modified">Modified (~)</option>
+            <option value="removed">Removed (-)</option>
           </select>
 
+          {/* Time Filter */}
           <select
             value={timeFilter}
-            onChange={(e) => setTimeFilter(e.target.value)}
+            onChange={(e) => {
+              setTimeFilter(e.target.value);
+              setSelectedItemIndex(0);
+              setCurrentPage(1);
+            }}
             style={{
               backgroundColor: 'var(--bg-card)',
-              border: '1px solid #162444',
+              border: '1px solid var(--border-card)',
               borderRadius: '8px',
               padding: '8px 14px',
               color: 'var(--text-heading)',
@@ -350,19 +418,48 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             <option value="7d">Last 7 days</option>
             <option value="90d">Last 90 days</option>
           </select>
+
+          {/* Reset button if filtered */}
+          {(frameworkFilter !== 'all' || changeTypeFilter !== 'all' || timeFilter !== '30d' || searchQuery) && (
+            <button
+              onClick={() => {
+                setFrameworkFilter('all');
+                setChangeTypeFilter('all');
+                setTimeFilter('30d');
+                setSearchQuery('');
+                setSelectedItemIndex(0);
+                setCurrentPage(1);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--accent-primary)',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Reset filters
+            </button>
+          )}
         </div>
 
+        {/* Live Search Input */}
         <div style={{ position: 'relative', width: '280px' }}>
-          <Search size={15} color="#64748B" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+          <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
-            placeholder="Search changes..."
+            placeholder="Search changes or control IDs..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSelectedItemIndex(0);
+              setCurrentPage(1);
+            }}
             style={{
               width: '100%',
               backgroundColor: 'var(--bg-card)',
-              border: '1px solid #162444',
+              border: '1px solid var(--border-card)',
               borderRadius: '8px',
               padding: '8px 14px 8px 36px',
               color: 'var(--text-heading)',
@@ -373,7 +470,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
         </div>
       </div>
 
-      {/* Two-Column Split Layout (Mockup Exact Match) */}
+      {/* Two-Column Split Layout */}
       <div
         style={{
           display: 'grid',
@@ -384,101 +481,173 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
       >
         {/* Left Column: Changes List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {mockUpdates.map((item, idx) => {
-            const isSelected = selectedItemIndex === idx;
-            return (
-              <div
-                key={item.id}
-                onClick={() => setSelectedItemIndex(idx)}
-                style={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: isSelected ? '1.5px solid #38BDF8' : '1px solid #162444',
-                  borderRadius: '12px',
-                  padding: '16px 18px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  boxShadow: isSelected ? '0 0 20px rgba(56, 189, 248, 0.15)' : 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                }}
-              >
-                {/* Row 1: Logo + Name + Version Arrow + Time + Severity Pill */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                    <FrameworkLogo slug={item.slug} name={item.name} size={32} />
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                      {item.name}
-                    </div>
-                    <span className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                      {item.versionFrom} → {item.versionTo}
-                    </span>
-
-                    {/* Change Badges */}
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                        +{item.addedCount} added
-                      </span>
-                      <span style={{ fontSize: '10px', fontWeight: 600, color: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                        -{item.removedCount} removed
-                      </span>
-                      <span style={{ fontSize: '10px', fontWeight: 600, color: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                        +{item.modifiedCount} modified
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.timeAgo}</span>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
-                        color: item.severityColor,
-                        border: `1px solid ${item.severityColor}40`,
-                      }}
-                    >
-                      {item.severity}
-                    </span>
-                    <ChevronRight size={15} color="#64748B" />
-                  </div>
-                </div>
-
-                {/* Subtitle / Change excerpt */}
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '44px' }}>
-                  {item.subtitle}
-                </div>
+          {filteredUpdates.length === 0 ? (
+            <div
+              className="theme-card"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-card)',
+                borderRadius: '12px',
+                padding: '40px 20px',
+                textAlign: 'center',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <AlertCircle size={32} color="var(--text-muted)" style={{ margin: '0 auto 12px auto' }} />
+              <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                No changes match your active filters
               </div>
-            );
-          })}
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Try resetting your search query or selecting "All Frameworks".
+              </div>
+            </div>
+          ) : (
+            paginatedUpdates.map((item, idxInPage) => {
+              const globalIdx = (currentPage - 1) * pageSize + idxInPage;
+              const isSelected = selectedItemIndex === globalIdx;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectFrameworkItem(idxInPage)}
+                  className="theme-card"
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: isSelected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-card)',
+                    borderRadius: '12px',
+                    padding: '16px 18px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    boxShadow: isSelected ? '0 0 20px var(--accent-glow)' : 'var(--shadow-card)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  {/* Row 1: Logo + Name + Version Arrow + Time + Severity Pill */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <FrameworkLogo slug={item.slug} name={item.name} size={32} />
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                        {item.name}
+                      </div>
+                      <span className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                        {item.versionFrom} → {item.versionTo}
+                      </span>
+
+                      {/* Change Badges */}
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        {item.addedCount > 0 && (
+                          <span style={{ fontSize: '10px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                            +{item.addedCount} added
+                          </span>
+                        )}
+                        {item.removedCount > 0 && (
+                          <span style={{ fontSize: '10px', fontWeight: 600, color: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                            -{item.removedCount} removed
+                          </span>
+                        )}
+                        {item.modifiedCount > 0 && (
+                          <span style={{ fontSize: '10px', fontWeight: 600, color: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                            ~{item.modifiedCount} modified
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.timeAgo}</span>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                          color: item.severityColor,
+                          border: `1px solid ${item.severityColor}40`,
+                        }}
+                      >
+                        {item.severity}
+                      </span>
+                      <ChevronRight size={15} color="var(--text-muted)" />
+                    </div>
+                  </div>
+
+                  {/* Subtitle / Change excerpt */}
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '44px' }}>
+                    {item.subtitle}
+                  </div>
+                </div>
+              );
+            })
+          )}
 
           {/* Pagination Controls */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 6px', fontSize: '12px', color: 'var(--text-muted)' }}>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-muted)', cursor: 'pointer' }}>&lt;</button>
-              <button style={{ backgroundColor: '#1E293B', border: '1px solid #38BDF8', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-heading)', fontWeight: 600, cursor: 'pointer' }}>1</button>
-              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>2</button>
-              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>3</button>
-              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>4</button>
-              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-secondary)', cursor: 'pointer' }}>5</button>
-              <span style={{ padding: '4px' }}>...</span>
-              <button style={{ backgroundColor: 'var(--bg-card)', border: '1px solid #162444', borderRadius: '6px', padding: '4px 8px', color: 'var(--text-muted)', cursor: 'pointer' }}>&gt;</button>
-            </div>
+          {filteredUpdates.length > pageSize && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 6px', fontSize: '12px', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-card)',
+                    borderRadius: '6px',
+                    padding: '4px 8px',
+                    color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-heading)',
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  &lt;
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    style={{
+                      backgroundColor: currentPage === p ? 'var(--accent-blue)' : 'var(--bg-card)',
+                      border: currentPage === p ? '1px solid var(--accent-primary)' : '1px solid var(--border-card)',
+                      borderRadius: '6px',
+                      padding: '4px 10px',
+                      color: currentPage === p ? '#FFFFFF' : 'var(--text-secondary)',
+                      fontWeight: currentPage === p ? 700 : 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-card)',
+                    borderRadius: '6px',
+                    padding: '4px 8px',
+                    color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-heading)',
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  &gt;
+                </button>
+              </div>
 
-            <div>
-              Showing 1-8 of 42 changes
+              <div>
+                Showing {(currentPage - 1) * pageSize + 1}-
+                {Math.min(currentPage * pageSize, filteredUpdates.length)} of {filteredUpdates.length} changes
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Column: Detailed Change Inspector Card */}
         <div
+          className="theme-card"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid #162444',
+            border: '1px solid var(--border-card)',
             borderRadius: '14px',
             padding: '24px',
             display: 'flex',
@@ -486,6 +655,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             gap: '20px',
             position: 'sticky',
             top: '88px',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           {/* Header */}
@@ -531,112 +701,104 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
               padding: '10px 14px',
               backgroundColor: 'var(--bg-card-subtle)',
               borderRadius: '8px',
-              border: '1px solid #14213D',
+              border: '1px solid var(--border-subtle)',
               fontSize: '12px',
             }}
           >
             <div>
               <span style={{ color: 'var(--text-muted)' }}>Source: </span>
-              <a href={currentInspectorItem.sourceUrl} target="_blank" rel="noreferrer" style={{ color: '#38BDF8', textDecoration: 'none', fontWeight: 500 }}>
+              <a href={currentInspectorItem.sourceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>
                 {currentInspectorItem.source}
               </a>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-              <span>Change Signal</span>
+              <span>Signal</span>
               <span style={{ color: 'var(--text-muted)' }}>•</span>
-              <span style={{ color: '#CBD5E1', fontFamily: 'monospace', fontSize: '11px' }}>
+              <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: '11px' }}>
                 {currentInspectorItem.changeSignal}
               </span>
-              <Code size={13} color="#64748B" />
+              <Code size={13} color="var(--text-muted)" />
             </div>
           </div>
 
-          {/* Change Summary Box (Grounded AI Summary) */}
+          {/* Grounded AI Summary Box */}
           <div
             style={{
-              backgroundColor: 'rgba(56, 189, 248, 0.04)',
-              border: '1px solid rgba(56, 189, 248, 0.18)',
+              backgroundColor: 'rgba(56, 189, 248, 0.05)',
+              border: '1px solid var(--accent-glow)',
               borderRadius: '10px',
               padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, color: '#38BDF8', marginBottom: '8px' }}>
-              <FileText size={15} />
-              Change Summary
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--accent-primary)' }}>
+              <Shield size={16} color="var(--accent-primary)" />
+              Grounded AI Summary (Google Gemini)
             </div>
             <div style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.6 }}>
               {currentInspectorItem.summary}
             </div>
           </div>
 
-          {/* Changes Breakdown */}
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
-              Changes Breakdown
+          {/* Diff Breakdown Counters */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+            <div style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#10B981' }}>+{currentInspectorItem.addedCount}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Added Controls</div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-              <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#10B981' }}>{currentInspectorItem.addedCount}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Added</div>
-              </div>
-              <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#EF4444' }}>{currentInspectorItem.removedCount}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Removed</div>
-              </div>
-              <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#F59E0B' }}>{currentInspectorItem.modifiedCount}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>Modified</div>
-              </div>
+            <div style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#EF4444' }}>-{currentInspectorItem.removedCount}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Removed</div>
+            </div>
+            <div style={{ backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#F59E0B' }}>~{currentInspectorItem.modifiedCount}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Modified</div>
             </div>
           </div>
 
           {/* Key Changes List */}
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
-              Key Changes
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '10px' }}>
+              Key Modified & Added Controls:
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {currentInspectorItem.keyChanges.map((kc, i) => (
+              {currentInspectorItem.keyChanges.map((change, i) => (
                 <div
                   key={i}
                   style={{
                     display: 'flex',
-                    alignItems: 'baseline',
+                    alignItems: 'flex-start',
                     gap: '10px',
-                    backgroundColor: 'var(--bg-card-subtle)',
                     padding: '8px 12px',
+                    backgroundColor: 'var(--bg-card-subtle)',
                     borderRadius: '8px',
-                    border: '1px solid #14213D',
+                    border: '1px solid var(--border-subtle)',
                     fontSize: '12px',
                   }}
                 >
                   <span
                     style={{
-                      fontSize: '10px',
-                      fontWeight: 600,
-                      textTransform: 'capitalize',
+                      fontFamily: 'monospace',
+                      fontWeight: 700,
+                      color: change.type === 'added' ? '#10B981' : change.type === 'removed' ? '#EF4444' : '#F59E0B',
+                      backgroundColor: change.type === 'added' ? 'rgba(16, 185, 129, 0.1)' : change.type === 'removed' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                       padding: '2px 6px',
                       borderRadius: '4px',
-                      backgroundColor: kc.type === 'added' ? 'rgba(16, 185, 129, 0.15)' : kc.type === 'removed' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                      color: kc.type === 'added' ? '#10B981' : kc.type === 'removed' ? '#EF4444' : '#F59E0B',
                       flexShrink: 0,
                     }}
                   >
-                    {kc.type}
+                    {change.id}
                   </span>
-                  <span className="mono" style={{ fontWeight: 600, color: 'var(--text-heading)', flexShrink: 0 }}>
-                    {kc.id}
-                  </span>
-                  <span style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                    {kc.desc}
-                  </span>
+                  <span style={{ color: 'var(--text-primary)', lineHeight: 1.5 }}>{change.desc}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
             <button
               onClick={() => setIsModalOpen(true)}
@@ -646,7 +808,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
                 padding: '10px',
                 fontSize: '13px',
                 borderRadius: '8px',
-                backgroundColor: '#2563EB',
+                backgroundColor: 'var(--accent-blue)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
