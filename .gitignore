@@ -30,8 +30,10 @@ desktop.ini
 
 # ── Node / Dashboard ──
 node_modules/
+dashboard/node_modules/
 dashboard/dist/
 dashboard/.vite/
+dashboard/.env
 
 # ── Testing ──
 .pytest_cache/

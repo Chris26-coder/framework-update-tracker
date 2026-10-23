@@ -207,6 +207,7 @@ def bulk_insert_changes(
             "before_text": ch.get("before_text"),
             "after_text": ch.get("after_text"),
             "field_changes": ch.get("field_changes", {}),
+            "llm_summary": ch.get("llm_summary") or ch.get("summary"),
         }
         for ch in changes
     ]

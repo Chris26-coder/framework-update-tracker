@@ -21,3 +21,6 @@ ruff>=0.4,<1.0
 
 # ── LLM (optional — install only if using summaries) ──
 openai>=1.30,<2.0
+
+# ── Dashboard ──
+streamlit>=1.35,<2.0

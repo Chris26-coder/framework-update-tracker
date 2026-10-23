@@ -1,0 +1,326 @@
+/* Framework Update Tracker Design System - Compliant with PRD Part 4.3 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg-primary: #0B1220;
+  --bg-surface: #111A2E;
+  --bg-surface-hover: #17233D;
+  --border-color: #1F2A44;
+  --border-subtle: #192338;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-light: rgba(59, 130, 246, 0.15);
+  
+  --color-added: #10B981;
+  --color-added-bg: rgba(16, 185, 129, 0.12);
+  --color-added-border: rgba(16, 185, 129, 0.3);
+  
+  --color-modified: #F59E0B;
+  --color-modified-bg: rgba(245, 158, 11, 0.12);
+  --color-modified-border: rgba(245, 158, 11, 0.3);
+  
+  --color-removed: #EF4444;
+  --color-removed-bg: rgba(239, 68, 68, 0.12);
+  --color-removed-border: rgba(239, 68, 68, 0.3);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+}
+
+.light-theme {
+  --bg-primary: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F1F5F9;
+  --border-color: #E2E8F0;
+  --border-subtle: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-light: rgba(37, 99, 235, 0.08);
+  
+  --color-added: #059669;
+  --color-added-bg: rgba(16, 185, 129, 0.1);
+  --color-added-border: rgba(16, 185, 129, 0.25);
+  
+  --color-modified: #D97706;
+  --color-modified-bg: rgba(245, 158, 11, 0.1);
+  --color-modified-border: rgba(245, 158, 11, 0.25);
+  
+  --color-removed: #DC2626;
+  --color-removed-bg: rgba(239, 68, 68, 0.1);
+  --color-removed-border: rgba(239, 68, 68, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Layout Utilities */
+.app-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px 64px 24px;
+}
+
+/* Typography */
+h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Card Container */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: #2D3D60;
+  box-shadow: var(--shadow-md);
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.badge-added {
+  color: var(--color-added);
+  background: var(--color-added-bg);
+  border: 1px solid var(--color-added-border);
+}
+
+.badge-modified {
+  color: var(--color-modified);
+  background: var(--color-modified-bg);
+  border: 1px solid var(--color-modified-border);
+}
+
+.badge-removed {
+  color: var(--color-removed);
+  background: var(--color-removed-bg);
+  border: 1px solid var(--color-removed-border);
+}
+
+.badge-tier1 {
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.badge-tier2 {
+  color: #A855F7;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.badge-success {
+  color: #34D399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.badge-failed {
+  color: #F87171;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.badge-neutral {
+  color: var(--text-secondary);
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--border-color);
+}
+
+/* Tables */
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-surface);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background: var(--border-subtle);
+  padding: 12px 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+tr.clickable-row:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: #2D3D60;
+}
+
+/* Inputs */
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+/* Diff View */
+.diff-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background: var(--bg-primary);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.diff-col {
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.diff-old {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid var(--color-removed-border);
+}
+
+.diff-new {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid var(--color-added-border);
+}

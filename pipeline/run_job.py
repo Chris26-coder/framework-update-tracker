@@ -22,6 +22,7 @@ from .config import settings
 from .core.diff import diff_controls
 from .core.hashing import compute_hash
 from .core.normalize import normalize_controls
+from .core.summarizer import summarize_changes
 from .fetchers import cprt as cprt_fetcher
 from .fetchers import github as github_fetcher
 from .fetchers import web as web_fetcher
@@ -171,6 +172,7 @@ def process_framework(framework: dict[str, Any]) -> str:
             changes = diff_controls(old_normalised, controls)
             if changes:
                 logger.info("[%s] Found %d control-level changes.", slug, len(changes))
+                summarize_changes(changes)
                 db.bulk_insert_changes(
                     framework_id=fw_id,
                     from_version_id=latest_version["id"],
