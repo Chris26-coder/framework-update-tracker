@@ -5,8 +5,9 @@ import { DashboardHome } from './pages/DashboardHome';
 import { FrameworksPage } from './pages/FrameworksPage';
 import { ChangeLogPage } from './pages/ChangeLogPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { RunsPage } from './pages/RunsPage';
 import { FrameworkDetailPage } from './pages/FrameworkDetailPage';
-import { FrameworkOverview, getFrameworkOverview } from './lib/api';
+import { FrameworkOverview, getFrameworkOverview, getLatestRun, formatTimeAgo } from './lib/api';
 
 export type ActiveTab = NavigationTab | 'detail';
 export type ThemeMode = 'dark' | 'light' | 'system';
@@ -15,6 +16,7 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<ActiveTab>('dashboard');
   const [selectedFrameworkSlug, setSelectedFrameworkSlug] = useState<string | null>(null);
   const [frameworks, setFrameworks] = useState<FrameworkOverview[]>([]);
+  const [lastCheckedText, setLastCheckedText] = useState<string>('Just now');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Theme state: 'dark' | 'light' | 'system' (persisted in localStorage)
@@ -67,8 +69,14 @@ export function App() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const fwList = await getFrameworkOverview();
+      const [fwList, latestRun] = await Promise.all([
+        getFrameworkOverview(),
+        getLatestRun(),
+      ]);
       setFrameworks(fwList);
+      if (latestRun?.started_at) {
+        setLastCheckedText(formatTimeAgo(latestRun.started_at));
+      }
     } catch (err) {
       console.error('Error loading framework overview data:', err);
     } finally {
@@ -134,7 +142,7 @@ export function App() {
       <Sidebar
         currentTab={currentTab === 'detail' ? 'frameworks' : currentTab}
         onSelectTab={handleNavSelect}
-        lastCheckedText="2h ago"
+        lastCheckedText={lastCheckedText}
       />
 
       {/* Main Content Area */}
@@ -200,6 +208,9 @@ export function App() {
               onSelectThemeMode={setThemeMode}
             />
           )}
+
+          {/* Tab 5: Automated Pipeline Execution Runs */}
+          {currentTab === 'runs' && <RunsPage />}
 
           {/* Framework Detail View (Drilldown) */}
           {currentTab === 'detail' && selectedFramework && (

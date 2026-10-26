@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, Layers, FileText, Settings, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Layers, FileText, Settings, ShieldAlert, History } from 'lucide-react';
 
-export type NavigationTab = 'dashboard' | 'frameworks' | 'changelog' | 'settings';
+export type NavigationTab = 'dashboard' | 'frameworks' | 'changelog' | 'runs' | 'settings';
 
 interface SidebarProps {
   currentTab: NavigationTab;
@@ -12,12 +12,13 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
-  lastCheckedText = '2h ago',
+  lastCheckedText = 'Just now',
 }) => {
   const navItems = [
     { id: 'dashboard' as const, label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { id: 'frameworks' as const, label: 'Frameworks', icon: <Layers size={18} /> },
     { id: 'changelog' as const, label: 'Change Log', icon: <FileText size={18} /> },
+    { id: 'runs' as const, label: 'Pipeline Runs', icon: <History size={18} /> },
     { id: 'settings' as const, label: 'Settings', icon: <Settings size={18} /> },
   ];
 

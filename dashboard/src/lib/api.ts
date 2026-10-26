@@ -239,6 +239,29 @@ export async function getFetchRuns(limit = 50): Promise<FetchRun[]> {
   }));
 }
 
+export async function getLatestRun(): Promise<FetchRun | null> {
+  const runs = await getFetchRuns(1);
+  return runs.length > 0 ? runs[0] : null;
+}
+
+export function formatTimeAgo(dateString?: string | null): string {
+  if (!dateString) return 'Just now';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffSec = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 1000));
+
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDays = Math.floor(diffHr / 24);
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
 export async function getDashboardMetrics() {
   const frameworks = await getFrameworkOverview();
   const totalFrameworks = frameworks.length;

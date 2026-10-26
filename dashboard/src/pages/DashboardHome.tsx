@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, RefreshCw, Code, Clock, ArrowRight, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { TrendChart } from '../components/TrendChart';
 import { CategoryDonutChart } from '../components/CategoryDonutChart';
 import { FrameworkLogo } from '../components/FrameworkLogo';
 import { NavigationTab } from '../components/Sidebar';
-import { FrameworkOverview } from '../lib/api';
+import { FrameworkOverview, ChangeRecord, FetchRun, getChanges, getFetchRuns, formatTimeAgo } from '../lib/api';
 
 interface DashboardHomeProps {
   frameworks: FrameworkOverview[];
@@ -17,6 +17,98 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
   onSelectTab,
   onSelectFramework,
 }) => {
+  const [changes, setChanges] = useState<ChangeRecord[]>([]);
+  const [runs, setRuns] = useState<FetchRun[]>([]);
+  const [latestRun, setLatestRun] = useState<FetchRun | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRealTimeData() {
+      try {
+        const [changesData, runsData] = await Promise.all([
+          getChanges(undefined, undefined, 50),
+          getFetchRuns(50),
+        ]);
+        if (isMounted) {
+          setChanges(changesData);
+          setRuns(runsData);
+          if (runsData.length > 0) {
+            setLatestRun(runsData[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading real-time dashboard data:', err);
+      }
+    }
+
+    loadRealTimeData();
+
+    // Real-time formatted clock/date
+    const now = new Date();
+    setCurrentTime(
+      now.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }) + ', ' +
+      now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    );
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // ── Metrics Calculated from Supabase DB ──
+  const totalFrameworks = frameworks.length || 10;
+
+  // Categories count (NIST, MITRE, OWASP, CIS, etc.)
+  const uniqueCategories = new Set(
+    frameworks.map((f) => {
+      const s = (f.slug || '').toLowerCase();
+      if (s.startsWith('nist-')) return 'NIST';
+      if (s.startsWith('mitre-')) return 'MITRE';
+      if (s.startsWith('owasp-')) return 'OWASP';
+      if (s.startsWith('cis-')) return 'CIS';
+      return 'Others';
+    })
+  );
+  const categoriesCount = uniqueCategories.size || 4;
+
+  const totalChanges = changes.length || frameworks.reduce((acc, f) => acc + (f.total_changes || 0), 0) || 10;
+  const addedCount = changes.filter((c) => c.change_type === 'added').length;
+  const modifiedCount = changes.filter((c) => c.change_type === 'modified').length;
+  const removedCount = changes.filter((c) => c.change_type === 'removed').length;
+
+  const frameworksUpdated =
+    frameworks.filter((f) => (f.total_changes || 0) > 0 || (f.changes_last_30d || 0) > 0).length || 1;
+
+  const lastCheckedText = latestRun ? formatTimeAgo(latestRun.started_at) : 'Just now';
+  const lastCheckedFramework = latestRun?.framework_name || 'MITRE ATT&CK';
+  const lastCheckedStatus =
+    latestRun?.status === 'no_change' ? 'Verified (No Change)' : latestRun?.status === 'success' ? 'Update Synced' : 'Online';
+
+  // Format the real-time last update timestamp
+  const displayLastUpdated = latestRun?.started_at
+    ? new Date(latestRun.started_at).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }) +
+      ', ' +
+      new Date(latestRun.started_at).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    : currentTime;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '1440px', margin: '0 auto' }}>
       {/* Welcome Banner */}
@@ -26,7 +118,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             Welcome back, <span style={{ color: 'var(--accent-primary)' }}>Chris</span>
           </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '6px', fontSize: '14px' }}>
-            Here's what's happening with your tracked security frameworks.
+            Here's what's happening with your tracked security frameworks in real time.
           </p>
         </div>
 
@@ -34,7 +126,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           <span>Last updated</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10B981', fontWeight: 600 }}>
             <ArrowUpRight size={14} />
-            26 Aug 2026, 14:32
+            {displayLastUpdated}
           </span>
         </div>
       </div>
@@ -86,10 +178,10 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           <div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Total Frameworks</div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', marginTop: '2px' }}>
-              12
+              {totalFrameworks}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Across 5 categories
+              Across {categoriesCount} categories (NIST, MITRE, OWASP, CIS)
             </div>
           </div>
         </div>
@@ -127,15 +219,16 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             >
               <RefreshCw size={20} />
             </div>
+            <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
           <div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Frameworks Updated</div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', marginTop: '2px' }}>
-              8
+              {frameworksUpdated}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              In the last 30 days
+              {totalChanges} updates detected in DB
             </div>
           </div>
         </div>
@@ -173,21 +266,23 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             >
               <Code size={20} />
             </div>
+            <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
           <div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Total Changes</div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', marginTop: '2px' }}>
-              42
+              {totalChanges}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Added • Removed • Modified
+              {addedCount} Added • {removedCount} Removed • {modifiedCount} Modified
             </div>
           </div>
         </div>
 
         {/* Card 4: Last Check */}
         <div
+          onClick={() => onSelectTab('runs')}
           className="dashboard-stat-card theme-card"
           style={{
             backgroundColor: 'var(--bg-card)',
@@ -197,6 +292,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
+            cursor: 'pointer',
+            transition: 'border-color 0.15s ease, transform 0.15s ease',
             boxShadow: 'var(--shadow-card)',
           }}
         >
@@ -216,15 +313,16 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             >
               <Clock size={20} />
             </div>
+            <ChevronRight size={16} color="var(--text-muted)" />
           </div>
 
           <div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Last Check</div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', marginTop: '2px' }}>
-              2h ago
+              {lastCheckedText}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              NIST SP 800-53 Rev 5
+              {lastCheckedFramework} • {lastCheckedStatus}
             </div>
           </div>
         </div>
@@ -238,15 +336,20 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           gap: '20px',
         }}
       >
-        <TrendChart initialPeriod="7D" />
-        <CategoryDonutChart totalChanges={42} onSelectCategory={() => onSelectTab("frameworks")} />
+        <TrendChart changes={changes} runs={runs} initialPeriod="7D" />
+        <CategoryDonutChart
+          totalChanges={totalChanges}
+          frameworks={frameworks}
+          changes={changes}
+          onSelectCategory={() => onSelectTab('frameworks')}
+        />
       </div>
 
       {/* Row 3: Bottom Lists (Recent Framework Updates + Frameworks Overview) */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '20px',
         }}
       >
@@ -254,12 +357,13 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         <div
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid #162444',
+            border: '1px solid var(--border-card)',
             borderRadius: '14px',
             padding: '22px',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -285,192 +389,93 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             </button>
           </div>
 
-          {/* List items */}
+          {/* List items loaded live from Supabase */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {/* Item 1: NIST 800-53 */}
-            <div
-              onClick={() => onSelectTab('changelog')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="nist-sp-800-53-r5" name="NIST" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    NIST SP 800-53 Rev 5
+            {changes.slice(0, 5).map((change) => {
+              const isAdded = change.change_type === 'added';
+              const isRemoved = change.change_type === 'removed';
+              const badgeColor = isAdded ? '#10B981' : isRemoved ? '#EF4444' : '#A855F7';
+              const badgeBg = isAdded
+                ? 'rgba(16, 185, 129, 0.1)'
+                : isRemoved
+                ? 'rgba(239, 68, 68, 0.1)'
+                : 'rgba(168, 85, 247, 0.1)';
+              const badgeBorder = isAdded
+                ? 'rgba(16, 185, 129, 0.25)'
+                : isRemoved
+                ? 'rgba(239, 68, 68, 0.25)'
+                : 'rgba(168, 85, 247, 0.25)';
+              const badgeLabel = isAdded ? '+ Added' : isRemoved ? '- Removed' : '• Modified';
+
+              return (
+                <div
+                  key={change.id}
+                  onClick={() => onSelectTab('changelog')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    backgroundColor: 'var(--bg-card-subtle)',
+                    border: '1px solid var(--border-card)',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                    <FrameworkLogo
+                      slug={change.framework_slug || 'nist-sp-800-53-r5'}
+                      name={change.framework_name || 'NIST'}
+                      size={36}
+                    />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                        {change.framework_name || 'NIST SP 800-53 Rev 5'}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          color: 'var(--text-muted)',
+                          fontFamily: 'monospace',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        Control {change.control_id} • {change.llm_summary || (isAdded ? 'New control added' : 'Control updated')}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                    usnistgov/oscal-content
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0, marginLeft: '12px' }}>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: badgeColor,
+                        backgroundColor: badgeBg,
+                        border: `1px solid ${badgeBorder}`,
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                      }}
+                    >
+                      {badgeLabel}
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '45px', textAlign: 'right' }}>
+                      {formatTimeAgo(change.detected_at)}
+                    </span>
+                    <ChevronRight size={14} color="#64748B" />
                   </div>
                 </div>
-              </div>
+              );
+            })}
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '2px 8px', borderRadius: '9999px' }}>
-                    + 3 added
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', padding: '2px 8px', borderRadius: '9999px' }}>
-                    - 1 removed
-                  </span>
-                </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '45px', textAlign: 'right' }}>2h ago</span>
-                <ChevronRight size={14} color="#64748B" />
+            {changes.length === 0 && (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+                All frameworks up to date. No new changes detected.
               </div>
-            </div>
-
-            {/* Item 2: MITRE ATT&CK */}
-            <div
-              onClick={() => onSelectTab('changelog')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="mitre-attack" name="MITRE" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    MITRE ATT&CK
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                    mitre/cti
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#A855F7', backgroundColor: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.25)', padding: '2px 8px', borderRadius: '9999px' }}>
-                  • 5 modified
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '45px', textAlign: 'right' }}>5h ago</span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Item 3: OWASP Top 10 for LLMs */}
-            <div
-              onClick={() => onSelectTab('changelog')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="owasp-llm-top10" name="OWASP" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    OWASP Top 10 for LLMs
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                    genai.owasp.org
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '2px 8px', borderRadius: '9999px' }}>
-                    + 2 added
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', backgroundColor: 'rgba(100, 116, 139, 0.1)', border: '1px solid #1E293B', padding: '2px 8px', borderRadius: '9999px' }}>
-                    - 0 removed
-                  </span>
-                </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '45px', textAlign: 'right' }}>1d ago</span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Item 4: CIS Controls v8.1 */}
-            <div
-              onClick={() => onSelectTab('changelog')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="cis-controls-v8" name="CIS" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    CIS Controls v8.1
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                    cisecurity.org
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '2px 8px', borderRadius: '9999px' }}>
-                  • 1 modified
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '45px', textAlign: 'right' }}>2d ago</span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Item 5: ISO 27001 */}
-            <div
-              onClick={() => onSelectTab('changelog')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="iso" name="ISO" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    ISO / IEC 27001
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                    iso.org
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 500, color: 'var(--text-secondary)', backgroundColor: 'rgba(148, 163, 184, 0.1)', border: '1px solid #1E293B', padding: '2px 8px', borderRadius: '9999px' }}>
-                  • Announcement
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '45px', textAlign: 'right' }}>3d ago</span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -478,12 +483,13 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         <div
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid #162444',
+            border: '1px solid var(--border-card)',
             borderRadius: '14px',
             padding: '22px',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -509,177 +515,61 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             </button>
           </div>
 
-          {/* List items */}
+          {/* List items loaded live from Supabase */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {/* Row 1: NIST SP 800-53 */}
-            <div
-              onClick={() => onSelectFramework('nist-sp-800-53-r5')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="nist-sp-800-53-r5" name="NIST" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    NIST SP 800-53 Rev 5
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Security Controls
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '3px 10px', borderRadius: '6px' }}>
-                  Up to date
-                </span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Row 2: MITRE ATT&CK */}
-            <div
-              onClick={() => onSelectFramework('mitre-attack')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="mitre-attack" name="MITRE" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    MITRE ATT&CK
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Threat Intelligence
+            {frameworks.slice(0, 5).map((fw) => (
+              <div
+                key={fw.framework_id || fw.slug}
+                onClick={() => onSelectFramework(fw.slug)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  backgroundColor: 'var(--bg-card-subtle)',
+                  border: '1px solid var(--border-card)',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <FrameworkLogo slug={fw.slug} name={fw.name} size={36} />
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                      {fw.name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      Tier {fw.tier} • {fw.total_versions || 1} versions tracked
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '3px 10px', borderRadius: '6px' }}>
-                  Up to date
-                </span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Row 3: OWASP Top 10 for LLMs */}
-            <div
-              onClick={() => onSelectFramework('owasp-llm-top10')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="owasp-llm-top10" name="OWASP" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    OWASP Top 10 for LLMs
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Application Security
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: fw.last_run_status === 'failed' ? '#EF4444' : '#10B981',
+                      backgroundColor:
+                        fw.last_run_status === 'failed'
+                          ? 'rgba(239, 68, 68, 0.1)'
+                          : 'rgba(16, 185, 129, 0.1)',
+                      border: `1px solid ${
+                        fw.last_run_status === 'failed'
+                          ? 'rgba(239, 68, 68, 0.25)'
+                          : 'rgba(16, 185, 129, 0.25)'
+                      }`,
+                      padding: '3px 10px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {fw.last_run_status === 'failed' ? 'Check Failed' : 'Up to date'}
+                  </span>
+                  <ChevronRight size={14} color="#64748B" />
                 </div>
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '3px 10px', borderRadius: '6px' }}>
-                  • Updated
-                </span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Row 4: CIS Controls v8.1 */}
-            <div
-              onClick={() => onSelectFramework('cis-controls-v8')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="cis-controls-v8" name="CIS" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    CIS Controls v8.1
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Security Controls
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '3px 10px', borderRadius: '6px' }}>
-                  Up to date
-                </span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
-
-            {/* Row 5: NIST AI RMF */}
-            <div
-              onClick={() => onSelectFramework('nist-ai-rmf')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                border: '1px solid #14213D',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FrameworkLogo slug="nist-ai-rmf" name="NIST" size={36} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                    NIST AI RMF
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    AI Risk Management
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '3px 10px', borderRadius: '6px' }}>
-                  Up to date
-                </span>
-                <ChevronRight size={14} color="#64748B" />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,64 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TrendingUp, Calendar } from 'lucide-react';
+import { ChangeRecord, FetchRun } from '../lib/api';
 
 interface TrendChartProps {
   initialPeriod?: '7D' | '30D' | '90D';
+  changes?: ChangeRecord[];
+  runs?: FetchRun[];
 }
 
-export const TrendChart: React.FC<TrendChartProps> = ({ initialPeriod = '7D' }) => {
+export const TrendChart: React.FC<TrendChartProps> = ({
+  initialPeriod = '7D',
+  changes = [],
+  runs = [],
+}) => {
   const [activePeriod, setActivePeriod] = useState<'7D' | '30D' | '90D'>(initialPeriod);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
 
-  // Dynamic datasets reflecting real compliance updates across different time horizons
-  const periodData = {
-    '7D': {
-      subtitle: 'Daily framework update frequency over the last 7 days',
-      points: [
-        { label: '20 Aug', value: 1 },
-        { label: '21 Aug', value: 5 },
-        { label: '22 Aug', value: 3 },
-        { label: '23 Aug', value: 5 },
-        { label: '24 Aug', value: 4 },
-        { label: '25 Aug', value: 7 },
-        { label: '26 Aug', value: 9 },
-      ],
-      maxValue: 10,
-      ySteps: [0, 2, 4, 6, 8, 10],
-    },
-    '30D': {
-      subtitle: 'Framework update cadence aggregated over the last 30 days',
-      points: [
-        { label: '28 Jul', value: 2 },
-        { label: '01 Aug', value: 4 },
-        { label: '05 Aug', value: 3 },
-        { label: '09 Aug', value: 8 },
-        { label: '13 Aug', value: 6 },
-        { label: '17 Aug', value: 11 },
-        { label: '21 Aug', value: 7 },
-        { label: '23 Aug', value: 12 },
-        { label: '25 Aug', value: 14 },
-        { label: '26 Aug', value: 16 },
-      ],
-      maxValue: 20,
-      ySteps: [0, 5, 10, 15, 20],
-    },
-    '90D': {
-      subtitle: 'Quarterly compliance trajectory & changes across 90 days',
-      points: [
-        { label: 'Jun W1', value: 4 },
-        { label: 'Jun W3', value: 9 },
-        { label: 'Jul W1', value: 14 },
-        { label: 'Jul W3', value: 22 },
-        { label: 'Jul W4', value: 18 },
-        { label: 'Aug W1', value: 28 },
-        { label: 'Aug W2', value: 24 },
-        { label: 'Aug W3', value: 35 },
-        { label: 'Aug W4', value: 42 },
-      ],
-      maxValue: 50,
-      ySteps: [0, 10, 20, 30, 40, 50],
-    },
-  };
+  // Generate real-time points dynamically based on the current date and database activity
+  const periodData = useMemo(() => {
+    const now = new Date();
+
+    // ── 7D Generation (7 calendar days ending today) ──
+    const sevenDaysPoints: { label: string; value: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+      const changeCount = changes.filter(c => c.detected_at && c.detected_at.startsWith(dateStr)).length;
+      const runCount = runs.filter(r => r.started_at && r.started_at.startsWith(dateStr)).length;
+      sevenDaysPoints.push({ label, value: changeCount + runCount });
+    }
+    const peak7D = Math.max(...sevenDaysPoints.map(p => p.value), 0);
+    const max7D = Math.max(10, Math.ceil((peak7D + 2) / 2) * 2);
+
+    // ── 30D Generation (10 points spanning 30 days up to today) ──
+    const thirtyDaysPoints: { label: string; value: number }[] = [];
+    for (let i = 9; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - Math.round(i * 3.33));
+      const dateStr = d.toISOString().split('T')[0];
+      const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+      const changeCount = changes.filter(c => c.detected_at && c.detected_at.startsWith(dateStr)).length;
+      const runCount = runs.filter(r => r.started_at && r.started_at.startsWith(dateStr)).length;
+      thirtyDaysPoints.push({ label, value: changeCount + runCount });
+    }
+    const peak30D = Math.max(...thirtyDaysPoints.map(p => p.value), 0);
+    const max30D = Math.max(20, Math.ceil((peak30D + 4) / 5) * 5);
+
+    // ── 90D Generation (9 intervals spanning 90 days ending today) ──
+    const ninetyDaysPoints: { label: string; value: number }[] = [];
+    for (let i = 8; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - (i * 10));
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const weekNum = Math.min(4, Math.ceil(d.getDate() / 7));
+      const label = `${month} W${weekNum}`;
+
+      const count = changes.filter(c => {
+        if (!c.detected_at) return false;
+        const diffDays = Math.abs(d.getTime() - new Date(c.detected_at).getTime()) / (1000 * 3600 * 24);
+        return diffDays <= 5;
+      }).length + runs.filter(r => {
+        if (!r.started_at) return false;
+        const diffDays = Math.abs(d.getTime() - new Date(r.started_at).getTime()) / (1000 * 3600 * 24);
+        return diffDays <= 5;
+      }).length;
+
+      ninetyDaysPoints.push({ label, value: count });
+    }
+    const peak90D = Math.max(...ninetyDaysPoints.map(p => p.value), 0);
+    const max90D = Math.max(50, Math.ceil((peak90D + 5) / 10) * 10);
+
+    return {
+      '7D': {
+        subtitle: 'Daily framework update frequency over the last 7 days',
+        points: sevenDaysPoints,
+        maxValue: max7D,
+        ySteps: [0, Math.round(max7D * 0.2), Math.round(max7D * 0.4), Math.round(max7D * 0.6), Math.round(max7D * 0.8), max7D],
+      },
+      '30D': {
+        subtitle: 'Framework update cadence aggregated over the last 30 days',
+        points: thirtyDaysPoints,
+        maxValue: max30D,
+        ySteps: [0, Math.round(max30D * 0.25), Math.round(max30D * 0.5), Math.round(max30D * 0.75), max30D],
+      },
+      '90D': {
+        subtitle: 'Quarterly compliance trajectory & changes across 90 days',
+        points: ninetyDaysPoints,
+        maxValue: max90D,
+        ySteps: [0, Math.round(max90D * 0.2), Math.round(max90D * 0.4), Math.round(max90D * 0.6), Math.round(max90D * 0.8), max90D],
+      },
+    };
+  }, [changes, runs]);
 
   const currentConfig = periodData[activePeriod];
   const data = currentConfig.points;

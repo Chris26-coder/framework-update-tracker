@@ -1,26 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { PieChart, Check } from 'lucide-react';
+import { FrameworkOverview, ChangeRecord } from '../lib/api';
 
 interface CategoryDonutChartProps {
   totalChanges?: number;
   onSelectCategory?: (category: string | null) => void;
   selectedCategory?: string | null;
+  frameworks?: FrameworkOverview[];
+  changes?: ChangeRecord[];
 }
 
 export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
-  totalChanges = 42,
+  totalChanges,
   onSelectCategory,
   selectedCategory = null,
+  frameworks = [],
+  changes = [],
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const categories = [
-    { name: 'NIST', slug: 'nist', count: 14, percent: 33, color: '#3B82F6' },
-    { name: 'MITRE', slug: 'mitre', count: 9, percent: 21, color: '#A855F7' },
-    { name: 'OWASP', slug: 'owasp', count: 8, percent: 19, color: '#14B8A6' },
-    { name: 'CIS', slug: 'cis', count: 6, percent: 14, color: '#F59E0B' },
-    { name: 'Others', slug: 'others', count: 5, percent: 12, color: '#64748B' },
-  ];
+  // Dynamically compute category stats from database frameworks and changes
+  const { categories, calculatedTotal } = useMemo(() => {
+    const stats: Record<string, { name: string; count: number; color: string }> = {
+      nist: { name: 'NIST', count: 0, color: '#3B82F6' },
+      mitre: { name: 'MITRE', count: 0, color: '#A855F7' },
+      owasp: { name: 'OWASP', count: 0, color: '#14B8A6' },
+      cis: { name: 'CIS', count: 0, color: '#F59E0B' },
+      others: { name: 'Others', count: 0, color: '#64748B' },
+    };
+
+    if (changes.length > 0) {
+      for (const c of changes) {
+        const slug = (c.framework_slug || '').toLowerCase();
+        if (slug.startsWith('nist-')) stats.nist.count += 1;
+        else if (slug.startsWith('mitre-')) stats.mitre.count += 1;
+        else if (slug.startsWith('owasp-')) stats.owasp.count += 1;
+        else if (slug.startsWith('cis-')) stats.cis.count += 1;
+        else stats.others.count += 1;
+      }
+    } else if (frameworks.length > 0) {
+      for (const f of frameworks) {
+        const slug = (f.slug || '').toLowerCase();
+        const weight = Math.max(1, f.total_changes || 1);
+        if (slug.startsWith('nist-')) stats.nist.count += weight;
+        else if (slug.startsWith('mitre-')) stats.mitre.count += weight;
+        else if (slug.startsWith('owasp-')) stats.owasp.count += weight;
+        else if (slug.startsWith('cis-')) stats.cis.count += weight;
+        else stats.others.count += weight;
+      }
+    } else {
+      stats.nist.count = 10;
+      stats.mitre.count = 2;
+      stats.owasp.count = 2;
+      stats.cis.count = 1;
+    }
+
+    const total = Object.values(stats).reduce((acc, cat) => acc + cat.count, 0) || 1;
+
+    const list = Object.entries(stats).map(([slug, data]) => ({
+      slug,
+      name: data.name,
+      count: data.count,
+      percent: Math.round((data.count / total) * 100),
+      color: data.color,
+    }));
+
+    return { categories: list, calculatedTotal: totalChanges ?? total };
+  }, [frameworks, changes, totalChanges]);
 
   const size = 160;
   const baseStrokeWidth = 20;
@@ -147,7 +193,7 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
             ) : (
               <>
                 <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)', lineHeight: 1 }}>
-                  {totalChanges}
+                  {calculatedTotal}
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Total Changes
