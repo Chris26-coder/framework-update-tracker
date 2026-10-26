@@ -44,7 +44,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
     async function loadRealTimeData() {
       try {
         const [changesData, runsData] = await Promise.all([
-          getChanges(undefined, undefined, 50),
+          getChanges(undefined, undefined, 100),
           getFetchRuns(50),
         ]);
         if (isMounted) {
@@ -59,9 +59,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
       }
     }
 
-    if (!initialChanges || initialChanges.length === 0) {
-      loadRealTimeData();
-    }
+    loadRealTimeData();
 
     // Real-time formatted clock/date
     const now = new Date();

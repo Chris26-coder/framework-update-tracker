@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PieChart, Check } from 'lucide-react';
-import { FrameworkOverview, ChangeRecord } from '../lib/api';
+import { FrameworkOverview, ChangeRecord, getChanges } from '../lib/api';
 
 interface CategoryDonutChartProps {
   totalChanges?: number;
@@ -15,9 +15,26 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
   onSelectCategory,
   selectedCategory = null,
   frameworks = [],
-  changes = [],
+  changes: propChanges = [],
 }) => {
+  const [internalChanges, setInternalChanges] = useState<ChangeRecord[]>(propChanges);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (propChanges.length > 0) {
+      setInternalChanges(propChanges);
+    } else {
+      getChanges(undefined, undefined, 100)
+        .then((data) => {
+          if (data && data.length > 0) {
+            setInternalChanges(data);
+          }
+        })
+        .catch((err) => console.error('CategoryDonutChart direct fetch error:', err));
+    }
+  }, [propChanges]);
+
+  const effectiveChanges = internalChanges.length > 0 ? internalChanges : propChanges;
 
   // Dynamically compute category stats from database frameworks and changes
   const { categories, calculatedTotal } = useMemo(() => {
@@ -29,8 +46,8 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
       others: { name: 'Others', count: 0, color: '#64748B' },
     };
 
-    if (changes.length > 0) {
-      for (const c of changes) {
+    if (effectiveChanges.length > 0) {
+      for (const c of effectiveChanges) {
         const slug = (c.framework_slug || '').toLowerCase();
         if (slug.startsWith('nist-')) stats.nist.count += 1;
         else if (slug.startsWith('mitre-')) stats.mitre.count += 1;
@@ -41,18 +58,17 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
     } else if (frameworks.length > 0) {
       for (const f of frameworks) {
         const slug = (f.slug || '').toLowerCase();
-        const weight = Math.max(1, f.total_changes || 1);
-        if (slug.startsWith('nist-')) stats.nist.count += weight;
-        else if (slug.startsWith('mitre-')) stats.mitre.count += weight;
-        else if (slug.startsWith('owasp-')) stats.owasp.count += weight;
-        else if (slug.startsWith('cis-')) stats.cis.count += weight;
-        else stats.others.count += weight;
+        const weight = f.total_changes || 0;
+        if (weight > 0) {
+          if (slug.startsWith('nist-')) stats.nist.count += weight;
+          else if (slug.startsWith('mitre-')) stats.mitre.count += weight;
+          else if (slug.startsWith('owasp-')) stats.owasp.count += weight;
+          else if (slug.startsWith('cis-')) stats.cis.count += weight;
+          else stats.others.count += weight;
+        }
       }
     } else {
       stats.nist.count = 10;
-      stats.mitre.count = 2;
-      stats.owasp.count = 2;
-      stats.cis.count = 1;
     }
 
     const total = Object.values(stats).reduce((acc, cat) => acc + cat.count, 0) || 1;
@@ -66,7 +82,7 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
     }));
 
     return { categories: list, calculatedTotal: totalChanges ?? total };
-  }, [frameworks, changes, totalChanges]);
+  }, [frameworks, effectiveChanges, totalChanges]);
 
   const size = 160;
   const baseStrokeWidth = 20;

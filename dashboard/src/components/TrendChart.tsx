@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { TrendingUp, Calendar } from 'lucide-react';
-import { ChangeRecord, FetchRun } from '../lib/api';
+import { ChangeRecord, FetchRun, getChanges } from '../lib/api';
 
 interface TrendChartProps {
   initialPeriod?: '7D' | '30D' | '90D';
@@ -10,11 +10,29 @@ interface TrendChartProps {
 
 export const TrendChart: React.FC<TrendChartProps> = ({
   initialPeriod = '7D',
-  changes = [],
+  changes: propChanges = [],
   runs = [],
 }) => {
+  const [internalChanges, setInternalChanges] = useState<ChangeRecord[]>(propChanges);
   const [activePeriod, setActivePeriod] = useState<'7D' | '30D' | '90D'>(initialPeriod);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
+
+  // Self-healing: if prop changes is empty, query Supabase changes directly
+  useEffect(() => {
+    if (propChanges.length > 0) {
+      setInternalChanges(propChanges);
+    } else {
+      getChanges(undefined, undefined, 100)
+        .then((data) => {
+          if (data && data.length > 0) {
+            setInternalChanges(data);
+          }
+        })
+        .catch((err) => console.error('TrendChart direct fetch error:', err));
+    }
+  }, [propChanges]);
+
+  const effectiveChanges = internalChanges.length > 0 ? internalChanges : propChanges;
 
   // Generate real-time points dynamically based on the current date and database activity
   const periodData = useMemo(() => {
@@ -31,7 +49,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
       const targetKey = toLocalKey(d);
       const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-      const changeCount = changes.filter(c => {
+      const changeCount = effectiveChanges.filter(c => {
         if (!c.detected_at) return false;
         return toLocalKey(new Date(c.detected_at)) === targetKey;
       }).length;
@@ -56,7 +74,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
 
       const label = dEnd.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-      const count = changes.filter(c => {
+      const count = effectiveChanges.filter(c => {
         if (!c.detected_at) return false;
         const cd = new Date(c.detected_at);
         return cd >= dStart && cd <= dEnd;
@@ -84,7 +102,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
       const weekNum = Math.min(4, Math.ceil(dEnd.getDate() / 7));
       const label = `${month} W${weekNum}`;
 
-      const count = changes.filter(c => {
+      const count = effectiveChanges.filter(c => {
         if (!c.detected_at) return false;
         const cd = new Date(c.detected_at);
         return cd >= dStart && cd <= dEnd;
@@ -115,7 +133,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
         ySteps: [0, Math.round(max90D * 0.2), Math.round(max90D * 0.4), Math.round(max90D * 0.6), Math.round(max90D * 0.8), max90D],
       },
     };
-  }, [changes]);
+  }, [effectiveChanges]);
 
   const currentConfig = periodData[activePeriod];
   const data = currentConfig.points;
