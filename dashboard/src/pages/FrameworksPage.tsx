@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FrameworkOverview } from '../lib/api';
+import { FrameworkOverview, formatTimeAgo } from '../lib/api';
 import { FrameworkLogo } from '../components/FrameworkLogo';
 import { Search, ChevronRight, LayoutGrid, List, FileText, RefreshCw, Clock, History, ExternalLink } from 'lucide-react';
 
@@ -52,16 +52,23 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
     }] : [])
   ];
 
+  const totalFrameworksCount = allCards.length;
+  const monitoredLast30Days = allCards.filter(f => f.enabled && f.last_checked_at).length || allCards.length;
+  const totalVersionsCount = allCards.reduce((acc, f) => acc + (f.total_versions || 1), 0);
+  const mostRecentCheck = allCards.map(f => f.last_checked_at).filter(Boolean).sort().reverse()[0];
+  const lastCheckedText = mostRecentCheck ? formatTimeAgo(mostRecentCheck) : 'Just now';
+
   const filtered = allCards.filter(fw => {
     const matchesSearch = fw.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           fw.slug.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTier = tierFilter === 'all' || String(fw.tier) === tierFilter;
     let matchesCategory = true;
     if (categoryFilter !== 'all') {
-      if (categoryFilter === 'nist' && !fw.name.toLowerCase().includes('nist')) matchesCategory = false;
-      if (categoryFilter === 'mitre' && !fw.name.toLowerCase().includes('mitre')) matchesCategory = false;
-      if (categoryFilter === 'owasp' && !fw.name.toLowerCase().includes('owasp')) matchesCategory = false;
-      if (categoryFilter === 'cis' && !fw.name.toLowerCase().includes('cis')) matchesCategory = false;
+      const lower = fw.name.toLowerCase() + ' ' + fw.slug.toLowerCase();
+      if (categoryFilter === 'nist' && !lower.includes('nist')) matchesCategory = false;
+      if (categoryFilter === 'mitre' && !lower.includes('mitre')) matchesCategory = false;
+      if (categoryFilter === 'owasp' && !lower.includes('owasp')) matchesCategory = false;
+      if (categoryFilter === 'cis' && !lower.includes('cis')) matchesCategory = false;
     }
     return matchesSearch && matchesTier && matchesCategory;
   });
@@ -95,7 +102,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             <FileText size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{allCards.length}</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{totalFrameworksCount}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Total Frameworks</div>
           </div>
         </div>
@@ -105,7 +112,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             <RefreshCw size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>8</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{monitoredLast30Days}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Monitored (Last 30 days)</div>
           </div>
         </div>
@@ -115,7 +122,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             <History size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>42</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{totalVersionsCount}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Total Versions</div>
           </div>
         </div>
@@ -125,7 +132,7 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             <Clock size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>2h ago</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{lastCheckedText}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Last Check</div>
           </div>
         </div>
@@ -133,6 +140,50 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
 
       {/* Filter and Control Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Tier Dropdown */}
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value)}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              borderRadius: '8px',
+              padding: '8px 14px',
+              color: 'var(--text-heading)',
+              fontSize: '13px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="all">All Tiers ({allCards.length})</option>
+            <option value="1">Tier 1 ({allCards.filter(f => f.tier === 1).length})</option>
+            <option value="2">Tier 2 ({allCards.filter(f => f.tier === 2).length})</option>
+            <option value="3">Tier 3 ({allCards.filter(f => f.tier === 3).length})</option>
+          </select>
+
+          {/* Category Dropdown */}
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              borderRadius: '8px',
+              padding: '8px 14px',
+              color: 'var(--text-heading)',
+              fontSize: '13px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="all">All Categories</option>
+            <option value="nist">NIST ({allCards.filter(f => f.name.toLowerCase().includes('nist') || f.slug.includes('nist')).length})</option>
+            <option value="mitre">MITRE ({allCards.filter(f => f.name.toLowerCase().includes('mitre') || f.slug.includes('mitre')).length})</option>
+            <option value="owasp">OWASP ({allCards.filter(f => f.name.toLowerCase().includes('owasp') || f.slug.includes('owasp')).length})</option>
+            <option value="cis">CIS ({allCards.filter(f => f.name.toLowerCase().includes('cis') || f.slug.includes('cis')).length})</option>
+          </select>
+        </div>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Tier Dropdown */}
           <select

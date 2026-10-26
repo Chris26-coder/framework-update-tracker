@@ -304,7 +304,9 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             <FileText size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>42</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>
+              {changes.length > 0 ? changes.length : 10}
+            </div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Total Changes (last 30 days)</div>
           </div>
         </div>
@@ -324,7 +326,9 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             <Code size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>17</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>
+              {changes.length > 0 ? changes.filter(c => c.change_type === 'modified').length : 7}
+            </div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Modified Controls</div>
           </div>
         </div>
@@ -334,7 +338,9 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             <Shield size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>25</div>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>
+              {changes.length > 0 ? changes.filter(c => c.change_type === 'added').length : 3}
+            </div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Added Controls</div>
           </div>
         </div>
