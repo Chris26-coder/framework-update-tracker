@@ -8,19 +8,35 @@ import { FrameworkOverview, ChangeRecord, FetchRun, getChanges, getFetchRuns, fo
 
 interface DashboardHomeProps {
   frameworks: FrameworkOverview[];
+  changes?: ChangeRecord[];
+  runs?: FetchRun[];
   onSelectTab: (tab: NavigationTab) => void;
   onSelectFramework: (slug: string) => void;
 }
 
 export const DashboardHome: React.FC<DashboardHomeProps> = ({
   frameworks,
+  changes: initialChanges,
+  runs: initialRuns,
   onSelectTab,
   onSelectFramework,
 }) => {
-  const [changes, setChanges] = useState<ChangeRecord[]>([]);
-  const [runs, setRuns] = useState<FetchRun[]>([]);
-  const [latestRun, setLatestRun] = useState<FetchRun | null>(null);
+  const [changes, setChanges] = useState<ChangeRecord[]>(initialChanges || []);
+  const [runs, setRuns] = useState<FetchRun[]>(initialRuns || []);
+  const [latestRun, setLatestRun] = useState<FetchRun | null>(
+    initialRuns && initialRuns.length > 0 ? initialRuns[0] : null
+  );
   const [currentTime, setCurrentTime] = useState<string>('');
+
+  useEffect(() => {
+    if (initialChanges && initialChanges.length > 0) {
+      setChanges(initialChanges);
+    }
+    if (initialRuns && initialRuns.length > 0) {
+      setRuns(initialRuns);
+      setLatestRun(initialRuns[0]);
+    }
+  }, [initialChanges, initialRuns]);
 
   useEffect(() => {
     let isMounted = true;
@@ -43,7 +59,9 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
       }
     }
 
-    loadRealTimeData();
+    if (!initialChanges || initialChanges.length === 0) {
+      loadRealTimeData();
+    }
 
     // Real-time formatted clock/date
     const now = new Date();

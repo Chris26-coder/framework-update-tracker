@@ -20,59 +20,80 @@ export const TrendChart: React.FC<TrendChartProps> = ({
   const periodData = useMemo(() => {
     const now = new Date();
 
-    // ── 7D Generation (7 calendar days ending today) ──
+    const toLocalKey = (date: Date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+    // ── 7D Generation (7 calendar days ending today, using local timezone) ──
     const sevenDaysPoints: { label: string; value: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
+      const targetKey = toLocalKey(d);
       const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-      const changeCount = changes.filter(c => c.detected_at && c.detected_at.startsWith(dateStr)).length;
-      const runCount = runs.filter(r => r.started_at && r.started_at.startsWith(dateStr)).length;
-      sevenDaysPoints.push({ label, value: changeCount + runCount });
+      const changeCount = changes.filter(c => {
+        if (!c.detected_at) return false;
+        return toLocalKey(new Date(c.detected_at)) === targetKey;
+      }).length;
+
+      sevenDaysPoints.push({ label, value: changeCount });
     }
     const peak7D = Math.max(...sevenDaysPoints.map(p => p.value), 0);
     const max7D = Math.max(10, Math.ceil((peak7D + 2) / 2) * 2);
 
-    // ── 30D Generation (10 points spanning 30 days up to today) ──
+    // ── 30D Generation (10 continuous 3-day windows spanning 30 days) ──
     const thirtyDaysPoints: { label: string; value: number }[] = [];
     for (let i = 9; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - Math.round(i * 3.33));
-      const dateStr = d.toISOString().split('T')[0];
-      const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+      const endDaysAgo = i * 3;
+      const startDaysAgo = endDaysAgo + 2;
+      const dStart = new Date(now);
+      dStart.setDate(now.getDate() - startDaysAgo);
+      dStart.setHours(0, 0, 0, 0);
 
-      const changeCount = changes.filter(c => c.detected_at && c.detected_at.startsWith(dateStr)).length;
-      const runCount = runs.filter(r => r.started_at && r.started_at.startsWith(dateStr)).length;
-      thirtyDaysPoints.push({ label, value: changeCount + runCount });
+      const dEnd = new Date(now);
+      dEnd.setDate(now.getDate() - endDaysAgo);
+      dEnd.setHours(23, 59, 59, 999);
+
+      const label = dEnd.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+      const count = changes.filter(c => {
+        if (!c.detected_at) return false;
+        const cd = new Date(c.detected_at);
+        return cd >= dStart && cd <= dEnd;
+      }).length;
+
+      thirtyDaysPoints.push({ label, value: count });
     }
     const peak30D = Math.max(...thirtyDaysPoints.map(p => p.value), 0);
-    const max30D = Math.max(20, Math.ceil((peak30D + 4) / 5) * 5);
+    const max30D = Math.max(15, Math.ceil((peak30D + 3) / 5) * 5);
 
-    // ── 90D Generation (9 intervals spanning 90 days ending today) ──
+    // ── 90D Generation (9 continuous 10-day intervals spanning 90 days) ──
     const ninetyDaysPoints: { label: string; value: number }[] = [];
     for (let i = 8; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - (i * 10));
-      const month = d.toLocaleDateString('en-US', { month: 'short' });
-      const weekNum = Math.min(4, Math.ceil(d.getDate() / 7));
+      const endDaysAgo = i * 10;
+      const startDaysAgo = endDaysAgo + 9;
+      const dStart = new Date(now);
+      dStart.setDate(now.getDate() - startDaysAgo);
+      dStart.setHours(0, 0, 0, 0);
+
+      const dEnd = new Date(now);
+      dEnd.setDate(now.getDate() - endDaysAgo);
+      dEnd.setHours(23, 59, 59, 999);
+
+      const month = dEnd.toLocaleDateString('en-US', { month: 'short' });
+      const weekNum = Math.min(4, Math.ceil(dEnd.getDate() / 7));
       const label = `${month} W${weekNum}`;
 
       const count = changes.filter(c => {
         if (!c.detected_at) return false;
-        const diffDays = Math.abs(d.getTime() - new Date(c.detected_at).getTime()) / (1000 * 3600 * 24);
-        return diffDays <= 5;
-      }).length + runs.filter(r => {
-        if (!r.started_at) return false;
-        const diffDays = Math.abs(d.getTime() - new Date(r.started_at).getTime()) / (1000 * 3600 * 24);
-        return diffDays <= 5;
+        const cd = new Date(c.detected_at);
+        return cd >= dStart && cd <= dEnd;
       }).length;
 
       ninetyDaysPoints.push({ label, value: count });
     }
     const peak90D = Math.max(...ninetyDaysPoints.map(p => p.value), 0);
-    const max90D = Math.max(50, Math.ceil((peak90D + 5) / 10) * 10);
+    const max90D = Math.max(20, Math.ceil((peak90D + 4) / 5) * 5);
 
     return {
       '7D': {
@@ -94,7 +115,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
         ySteps: [0, Math.round(max90D * 0.2), Math.round(max90D * 0.4), Math.round(max90D * 0.6), Math.round(max90D * 0.8), max90D],
       },
     };
-  }, [changes, runs]);
+  }, [changes]);
 
   const currentConfig = periodData[activePeriod];
   const data = currentConfig.points;

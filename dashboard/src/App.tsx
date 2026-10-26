@@ -7,7 +7,16 @@ import { ChangeLogPage } from './pages/ChangeLogPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { RunsPage } from './pages/RunsPage';
 import { FrameworkDetailPage } from './pages/FrameworkDetailPage';
-import { FrameworkOverview, getFrameworkOverview, getLatestRun, formatTimeAgo } from './lib/api';
+import {
+  FrameworkOverview,
+  ChangeRecord,
+  FetchRun,
+  getFrameworkOverview,
+  getLatestRun,
+  getChanges,
+  getFetchRuns,
+  formatTimeAgo,
+} from './lib/api';
 
 export type ActiveTab = NavigationTab | 'detail';
 export type ThemeMode = 'dark' | 'light' | 'system';
@@ -16,6 +25,8 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<ActiveTab>('dashboard');
   const [selectedFrameworkSlug, setSelectedFrameworkSlug] = useState<string | null>(null);
   const [frameworks, setFrameworks] = useState<FrameworkOverview[]>([]);
+  const [changes, setChanges] = useState<ChangeRecord[]>([]);
+  const [runs, setRuns] = useState<FetchRun[]>([]);
   const [lastCheckedText, setLastCheckedText] = useState<string>('Just now');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -69,11 +80,15 @@ export function App() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [fwList, latestRun] = await Promise.all([
+      const [fwList, latestRun, changesList, runsList] = await Promise.all([
         getFrameworkOverview(),
         getLatestRun(),
+        getChanges(undefined, undefined, 100),
+        getFetchRuns(50),
       ]);
       setFrameworks(fwList);
+      setChanges(changesList);
+      setRuns(runsList);
       if (latestRun?.started_at) {
         setLastCheckedText(formatTimeAgo(latestRun.started_at));
       }
@@ -178,6 +193,8 @@ export function App() {
           {currentTab === 'dashboard' && (
             <DashboardHome
               frameworks={frameworks}
+              changes={changes}
+              runs={runs}
               onSelectTab={handleNavSelect}
               onSelectFramework={handleSelectFramework}
             />
