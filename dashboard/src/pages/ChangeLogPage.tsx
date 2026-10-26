@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FrameworkLogo } from '../components/FrameworkLogo';
 import { FullDiffModal } from '../components/FullDiffModal';
-import { ChangeRecord, FrameworkOverview, getChanges, formatTimeAgo } from '../lib/api';
-import { Clock, Search, ChevronRight, ExternalLink, Code, Layers, Shield, FileText, CheckCircle2, Sparkles } from 'lucide-react';
+import { ChangeRecord, FrameworkOverview, getChanges, getFrameworkOverview, formatTimeAgo } from '../lib/api';
+import { Clock, Search, ChevronRight, ExternalLink, Code, Layers, Shield, FileText, CheckCircle2, Sparkles, RefreshCw } from 'lucide-react';
 
 interface ChangeLogPageProps {
   frameworks: FrameworkOverview[];
@@ -11,12 +11,14 @@ interface ChangeLogPageProps {
 }
 
 export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
-  frameworks,
+  frameworks: propFrameworks = [],
   onSelectFramework,
   initialFrameworkSlug,
 }) => {
+  const [internalFrameworks, setInternalFrameworks] = useState<FrameworkOverview[]>(propFrameworks);
   const [changes, setChanges] = useState<ChangeRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [frameworkFilter, setFrameworkFilter] = useState(initialFrameworkSlug || 'all');
@@ -32,18 +34,33 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
     }
   }, [initialFrameworkSlug]);
 
+  // Self-healing frameworks: fetch if parent didn't supply them
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        const data = await getChanges(undefined, undefined, 100);
-        setChanges(data);
-      } catch (err) {
-        console.error('Error fetching changes:', err);
-      } finally {
-        setLoading(false);
-      }
+    if (propFrameworks.length > 0) {
+      setInternalFrameworks(propFrameworks);
+    } else {
+      getFrameworkOverview()
+        .then((fws) => setInternalFrameworks(fws))
+        .catch((err) => console.error('[ChangeLogPage] Frameworks fetch error:', err));
     }
+  }, [propFrameworks]);
+
+  const effectiveFrameworks = internalFrameworks.length > 0 ? internalFrameworks : propFrameworks;
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const data = await getChanges(undefined, undefined, 100);
+      setChanges(data);
+    } catch (err) {
+      console.error('[ChangeLogPage] Error fetching changes:', err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -182,7 +199,7 @@ export const ChangeLogPage: React.FC<ChangeLogPageProps> = ({
             }}
           >
             <option value="all">All Frameworks ({changes.length})</option>
-            {frameworks.map((f) => (
+            {effectiveFrameworks.map((f) => (
               <option key={f.slug} value={f.slug}>
                 {f.name} ({changes.filter((c) => c.framework_slug === f.slug).length})
               </option>
