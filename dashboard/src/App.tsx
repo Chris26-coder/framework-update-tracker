@@ -80,17 +80,24 @@ export function App() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [fwList, latestRun, changesList, runsList] = await Promise.all([
+      const results = await Promise.allSettled([
         getFrameworkOverview(),
         getLatestRun(),
         getChanges(undefined, undefined, 100),
         getFetchRuns(50),
       ]);
-      setFrameworks(fwList);
-      setChanges(changesList);
-      setRuns(runsList);
-      if (latestRun?.started_at) {
-        setLastCheckedText(formatTimeAgo(latestRun.started_at));
+
+      if (results[0].status === 'fulfilled') {
+        setFrameworks(results[0].value);
+      }
+      if (results[1].status === 'fulfilled' && results[1].value?.started_at) {
+        setLastCheckedText(formatTimeAgo(results[1].value.started_at));
+      }
+      if (results[2].status === 'fulfilled') {
+        setChanges(results[2].value);
+      }
+      if (results[3].status === 'fulfilled') {
+        setRuns(results[3].value);
       }
     } catch (err) {
       console.error('Error loading framework overview data:', err);

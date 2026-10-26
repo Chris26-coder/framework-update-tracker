@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { FrameworkOverview, formatTimeAgo } from '../lib/api';
+import React, { useState, useEffect } from 'react';
+import { FrameworkOverview, formatTimeAgo, getFrameworkOverview } from '../lib/api';
 import { FrameworkLogo } from '../components/FrameworkLogo';
-import { Search, ChevronRight, LayoutGrid, List, FileText, RefreshCw, Clock, History, ExternalLink } from 'lucide-react';
+import { Search, ChevronRight, LayoutGrid, List, FileText, RefreshCw, Clock, History, ExternalLink, Loader2 } from 'lucide-react';
 
 interface FrameworksPageProps {
   frameworks: FrameworkOverview[];
@@ -10,55 +10,62 @@ interface FrameworksPageProps {
 }
 
 export const FrameworksPage: React.FC<FrameworksPageProps> = ({
-  frameworks,
+  frameworks: initialFrameworks = [],
   onSelectFramework,
   initialSearch = '',
 }) => {
+  const [frameworks, setFrameworks] = useState<FrameworkOverview[]>(initialFrameworks);
+  const [loading, setLoading] = useState(initialFrameworks.length === 0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [tierFilter, setTierFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialSearch !== undefined) {
       setSearchTerm(initialSearch);
     }
   }, [initialSearch]);
 
-  // Augment frameworks list to match all standard cards from mockup
-  const allCards = [
-    ...frameworks,
-    // Add ISO Tier 3 if not in DB yet so it matches the PRD Tier 3 announcement mock
-    ...(!frameworks.some(f => f.slug === 'iso-27001') ? [{
-      framework_id: 'iso-27001-id',
-      slug: 'iso-27001',
-      name: 'ISO / IEC 27001',
-      tier: 3,
-      source_url: 'https://iso.org',
-      enabled: true,
-      last_checked_at: new Date(Date.now() - 172800000).toISOString(),
-      last_change_at: null,
-      latest_version_id: null,
-      latest_version_label: 'v2022',
-      latest_content_hash: null,
-      latest_fetched_at: null,
-      total_versions: 1,
-      total_changes: 0,
-      changes_last_30d: 0,
-      last_run_status: 'no_change' as const,
-      last_run_at: null,
-      last_run_error: null,
-      last_run_duration_ms: 120,
-    }] : [])
-  ];
+  // Self-healing: if parent frameworks is populated, use it; otherwise fetch directly from Supabase
+  useEffect(() => {
+    if (initialFrameworks.length > 0) {
+      setFrameworks(initialFrameworks);
+      setLoading(false);
+    } else {
+      setLoading(true);
+      getFrameworkOverview()
+        .then((data) => {
+          setFrameworks(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('Error fetching frameworks in FrameworksPage:', err);
+          setLoading(false);
+        });
+    }
+  }, [initialFrameworks]);
 
-  const totalFrameworksCount = allCards.length;
-  const monitoredLast30Days = allCards.filter(f => f.enabled && f.last_checked_at).length || allCards.length;
-  const totalVersionsCount = allCards.reduce((acc, f) => acc + (f.total_versions || 1), 0);
-  const mostRecentCheck = allCards.map(f => f.last_checked_at).filter(Boolean).sort().reverse()[0];
-  const lastCheckedText = mostRecentCheck ? formatTimeAgo(mostRecentCheck) : 'Just now';
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const data = await getFrameworkOverview();
+      setFrameworks(data);
+    } catch (err) {
+      console.error('Manual refresh failed:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-  const filtered = allCards.filter(fw => {
+  const totalFrameworksCount = frameworks.length;
+  const monitoredLast30Days = frameworks.filter(f => f.enabled && f.last_checked_at).length || frameworks.length;
+  const totalVersionsCount = frameworks.reduce((acc, f) => acc + (f.total_versions || 1), 0);
+  const mostRecentCheck = frameworks.map(f => f.last_checked_at).filter(Boolean).sort().reverse()[0];
+  const lastCheckedText = mostRecentCheck ? formatTimeAgo(mostRecentCheck) : 'Today';
+
+  const filtered = frameworks.filter(fw => {
     const matchesSearch = fw.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           fw.slug.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTier = tierFilter === 'all' || String(fw.tier) === tierFilter;
@@ -127,14 +134,37 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
           </div>
         </div>
 
-        <div className="theme-card" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: 'var(--shadow-card)' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4' }}>
-            <Clock size={20} />
+        <div className="theme-card" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(6, 182, 212, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06B6D4' }}>
+              <Clock size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{lastCheckedText}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Last Check</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>{lastCheckedText}</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Last Check</div>
-          </div>
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            title="Refresh latest check timestamps from Supabase"
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-card)',
+              borderRadius: '8px',
+              padding: '6px 10px',
+              color: 'var(--text-secondary)',
+              cursor: isRefreshing ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11px',
+              fontWeight: 500,
+            }}
+          >
+            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
@@ -156,10 +186,10 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
               cursor: 'pointer',
             }}
           >
-            <option value="all">All Tiers ({allCards.length})</option>
-            <option value="1">Tier 1 ({allCards.filter(f => f.tier === 1).length})</option>
-            <option value="2">Tier 2 ({allCards.filter(f => f.tier === 2).length})</option>
-            <option value="3">Tier 3 ({allCards.filter(f => f.tier === 3).length})</option>
+            <option value="all">All Tiers ({frameworks.length})</option>
+            <option value="1">Tier 1 ({frameworks.filter(f => f.tier === 1).length})</option>
+            <option value="2">Tier 2 ({frameworks.filter(f => f.tier === 2).length})</option>
+            <option value="3">Tier 3 ({frameworks.filter(f => f.tier === 3).length})</option>
           </select>
 
           {/* Category Dropdown */}
@@ -178,54 +208,10 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
             }}
           >
             <option value="all">All Categories</option>
-            <option value="nist">NIST ({allCards.filter(f => f.name.toLowerCase().includes('nist') || f.slug.includes('nist')).length})</option>
-            <option value="mitre">MITRE ({allCards.filter(f => f.name.toLowerCase().includes('mitre') || f.slug.includes('mitre')).length})</option>
-            <option value="owasp">OWASP ({allCards.filter(f => f.name.toLowerCase().includes('owasp') || f.slug.includes('owasp')).length})</option>
-            <option value="cis">CIS ({allCards.filter(f => f.name.toLowerCase().includes('cis') || f.slug.includes('cis')).length})</option>
-          </select>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          {/* Tier Dropdown */}
-          <select
-            value={tierFilter}
-            onChange={(e) => setTierFilter(e.target.value)}
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-card)',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              color: 'var(--text-heading)',
-              fontSize: '13px',
-              outline: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="all">All Tiers ({allCards.length})</option>
-            <option value="1">Tier 1 (Official)</option>
-            <option value="2">Tier 2 (Web)</option>
-            <option value="3">Tier 3 (Announcements)</option>
-          </select>
-
-          {/* Category Dropdown */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-card)',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              color: 'var(--text-heading)',
-              fontSize: '13px',
-              outline: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="all">All Categories</option>
-            <option value="nist">NIST Frameworks</option>
-            <option value="mitre">MITRE Frameworks</option>
-            <option value="owasp">OWASP Frameworks</option>
-            <option value="cis">CIS Controls</option>
+            <option value="nist">NIST ({frameworks.filter(f => f.name.toLowerCase().includes('nist') || f.slug.includes('nist')).length})</option>
+            <option value="mitre">MITRE ({frameworks.filter(f => f.name.toLowerCase().includes('mitre') || f.slug.includes('mitre')).length})</option>
+            <option value="owasp">OWASP ({frameworks.filter(f => f.name.toLowerCase().includes('owasp') || f.slug.includes('owasp')).length})</option>
+            <option value="cis">CIS ({frameworks.filter(f => f.name.toLowerCase().includes('cis') || f.slug.includes('cis')).length})</option>
           </select>
 
           {/* Search Input */}
@@ -297,8 +283,17 @@ export const FrameworksPage: React.FC<FrameworksPageProps> = ({
         </div>
       </div>
 
-      {/* Render: Grid View or List View */}
-      {viewMode === 'grid' ? (
+      {/* Render: Loading, Empty, Grid View or List View */}
+      {loading && frameworks.length === 0 ? (
+        <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 12px', color: 'var(--accent-primary)' }} />
+          <div>Loading monitored security frameworks from Supabase...</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div>No frameworks match your search and filter criteria.</div>
+        </div>
+      ) : viewMode === 'grid' ? (
         <div
           style={{
             display: 'grid',
