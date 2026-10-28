@@ -76,6 +76,7 @@ export interface FetchRun {
 // ── API Queries ──
 
 export async function getFrameworkOverview(): Promise<FrameworkOverview[]> {
+  console.log('[api.getFrameworkOverview] Fetching...');
   const { data, error } = await supabase
     .from('framework_overview')
     .select('*')
@@ -83,9 +84,10 @@ export async function getFrameworkOverview(): Promise<FrameworkOverview[]> {
     .order('slug', { ascending: true });
 
   if (error) {
-    console.error('Error fetching framework overview:', error);
+    console.error('[api.getFrameworkOverview] Error:', error);
     throw error;
   }
+  console.log('[api.getFrameworkOverview] Received', data?.length, 'frameworks');
   return data || [];
 }
 
@@ -148,6 +150,7 @@ export async function getChanges(
   changeType?: string,
   limit = 100
 ): Promise<ChangeRecord[]> {
+  console.log('[api.getChanges] Fetching changes...', { frameworkId, changeType, limit });
   let query = supabase
     .from('changes')
     .select(`
@@ -178,9 +181,11 @@ export async function getChanges(
 
   const { data, error } = await query;
   if (error) {
-    console.error('Error fetching changes:', error);
+    console.error('[api.getChanges] Error fetching changes:', error);
     throw error;
   }
+
+  console.log('[api.getChanges] Raw data rows:', data?.length, 'Sample:', data?.[0]);
 
   return (data || []).map((row: any) => ({
     id: row.id,

@@ -4,7 +4,7 @@ import { TrendChart } from '../components/TrendChart';
 import { CategoryDonutChart } from '../components/CategoryDonutChart';
 import { FrameworkLogo } from '../components/FrameworkLogo';
 import { NavigationTab } from '../components/Sidebar';
-import { FrameworkOverview, ChangeRecord, FetchRun, getChanges, getFetchRuns, formatTimeAgo } from '../lib/api';
+import { FrameworkOverview, ChangeRecord, FetchRun, getChanges, getFetchRuns, getFrameworkOverview, formatTimeAgo } from '../lib/api';
 
 interface DashboardHomeProps {
   frameworks: FrameworkOverview[];
@@ -21,13 +21,16 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
   onSelectTab,
   onSelectFramework,
 }) => {
+  const [internalFrameworks, setInternalFrameworks] = useState<FrameworkOverview[]>(frameworks);
   const [changes, setChanges] = useState<ChangeRecord[]>(initialChanges || []);
   const [runs, setRuns] = useState<FetchRun[]>(initialRuns || []);
   const [latestRun, setLatestRun] = useState<FetchRun | null>(
     initialRuns && initialRuns.length > 0 ? initialRuns[0] : null
   );
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [dataLoaded, setDataLoaded] = useState(false);
 
+  // Sync props into state when parent provides them
   useEffect(() => {
     if (initialChanges && initialChanges.length > 0) {
       setChanges(initialChanges);
@@ -36,26 +39,47 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
       setRuns(initialRuns);
       setLatestRun(initialRuns[0]);
     }
-  }, [initialChanges, initialRuns]);
+    if (frameworks && frameworks.length > 0) {
+      setInternalFrameworks(frameworks);
+    }
+  }, [initialChanges, initialRuns, frameworks]);
 
+  // Self-healing: always fetch directly from Supabase on mount to guarantee data
   useEffect(() => {
     let isMounted = true;
 
     async function loadRealTimeData() {
       try {
-        const [changesData, runsData] = await Promise.all([
+        const results = await Promise.allSettled([
           getChanges(undefined, undefined, 100),
           getFetchRuns(50),
+          getFrameworkOverview(),
         ]);
-        if (isMounted) {
-          setChanges(changesData);
-          setRuns(runsData);
-          if (runsData.length > 0) {
-            setLatestRun(runsData[0]);
-          }
+
+        if (!isMounted) return;
+
+        if (results[0].status === 'fulfilled' && results[0].value.length > 0) {
+          setChanges(results[0].value);
         }
+        if (results[1].status === 'fulfilled' && results[1].value.length > 0) {
+          setRuns(results[1].value);
+          setLatestRun(results[1].value[0]);
+        }
+        if (results[2].status === 'fulfilled' && results[2].value.length > 0) {
+          setInternalFrameworks(results[2].value);
+        }
+
+        // Log any errors for debugging
+        results.forEach((r, i) => {
+          if (r.status === 'rejected') {
+            console.error(`[DashboardHome] API call ${i} failed:`, r.reason);
+          }
+        });
+
+        setDataLoaded(true);
       } catch (err) {
-        console.error('Error loading real-time dashboard data:', err);
+        console.error('[DashboardHome] Error loading real-time dashboard data:', err);
+        setDataLoaded(true);
       }
     }
 
@@ -81,12 +105,15 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
     };
   }, []);
 
+  // Use self-healed frameworks (internal state) which always has data
+  const effectiveFrameworks = internalFrameworks.length > 0 ? internalFrameworks : frameworks;
+
   // ── Metrics Calculated from Supabase DB ──
-  const totalFrameworks = frameworks.length || 10;
+  const totalFrameworks = effectiveFrameworks.length || 10;
 
   // Categories count (NIST, MITRE, OWASP, CIS, etc.)
   const uniqueCategories = new Set(
-    frameworks.map((f) => {
+    effectiveFrameworks.map((f) => {
       const s = (f.slug || '').toLowerCase();
       if (s.startsWith('nist-')) return 'NIST';
       if (s.startsWith('mitre-')) return 'MITRE';
@@ -97,13 +124,13 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
   );
   const categoriesCount = uniqueCategories.size || 4;
 
-  const totalChanges = changes.length || frameworks.reduce((acc, f) => acc + (f.total_changes || 0), 0) || 10;
+  const totalChanges = changes.length || effectiveFrameworks.reduce((acc, f) => acc + (f.total_changes || 0), 0) || 10;
   const addedCount = changes.filter((c) => c.change_type === 'added').length;
   const modifiedCount = changes.filter((c) => c.change_type === 'modified').length;
   const removedCount = changes.filter((c) => c.change_type === 'removed').length;
 
   const frameworksUpdated =
-    frameworks.filter((f) => (f.total_changes || 0) > 0 || (f.changes_last_30d || 0) > 0).length || 1;
+    effectiveFrameworks.filter((f) => (f.total_changes || 0) > 0 || (f.changes_last_30d || 0) > 0).length || 1;
 
   const lastCheckedText = latestRun ? formatTimeAgo(latestRun.started_at) : 'Just now';
   const lastCheckedFramework = latestRun?.framework_name || 'MITRE ATT&CK';
@@ -355,7 +382,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         <TrendChart changes={changes} runs={runs} initialPeriod="7D" />
         <CategoryDonutChart
           totalChanges={totalChanges}
-          frameworks={frameworks}
+          frameworks={effectiveFrameworks}
           changes={changes}
           onSelectCategory={() => onSelectTab('frameworks')}
         />
@@ -533,7 +560,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
 
           {/* List items loaded live from Supabase */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {frameworks.slice(0, 5).map((fw) => (
+            {effectiveFrameworks.slice(0, 5).map((fw) => (
               <div
                 key={fw.framework_id || fw.slug}
                 onClick={() => onSelectFramework(fw.slug)}
