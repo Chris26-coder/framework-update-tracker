@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { FetchRun, getFetchRuns } from '../lib/api';
+import { FetchRun, getFetchRuns, triggerManualCheck, getFrameworkOverview, FrameworkOverview } from '../lib/api';
 import { StatusBadge } from '../components/StatusBadge';
 import { Skeleton } from '../components/Skeleton';
-import { FileText, RefreshCw, AlertTriangle, Clock, Terminal } from 'lucide-react';
+import { FileText, RefreshCw, AlertTriangle, Clock, Terminal, Play, Loader2, CheckCircle2 } from 'lucide-react';
 
 export const RunsPage: React.FC = () => {
   const [runs, setRuns] = useState<FetchRun[]>([]);
+  const [frameworks, setFrameworks] = useState<FrameworkOverview[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'success' | 'no_change' | 'failed'>('all');
+  const [selectedSlug, setSelectedSlug] = useState<string>('');
+  const [isRunningCheck, setIsRunningCheck] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchRunsData = async () => {
     setLoading(true);
     try {
-      const data = await getFetchRuns(50);
-      setRuns(data);
+      const [runsData, fwsData] = await Promise.all([
+        getFetchRuns(50),
+        getFrameworkOverview(),
+      ]);
+      setRuns(runsData);
+      setFrameworks(fwsData);
     } catch (err) {
       console.error('Error fetching runs:', err);
     } finally {
@@ -25,6 +33,37 @@ export const RunsPage: React.FC = () => {
     fetchRunsData();
   }, []);
 
+  const handleRunManualCheck = async () => {
+    setIsRunningCheck(true);
+    setToastMessage(null);
+    try {
+      const targetName = selectedSlug
+        ? frameworks.find(f => f.slug === selectedSlug)?.name || selectedSlug
+        : 'all frameworks';
+      
+      const res = await triggerManualCheck(selectedSlug);
+      if (res.success) {
+        setToastMessage({
+          type: 'success',
+          text: `Manual check completed successfully for ${targetName}!`,
+        });
+        await fetchRunsData();
+      } else {
+        setToastMessage({
+          type: 'error',
+          text: res.error || 'Failed to complete pipeline check.',
+        });
+      }
+    } catch (err: any) {
+      setToastMessage({
+        type: 'error',
+        text: err.message || 'An error occurred during manual check.',
+      });
+    } finally {
+      setIsRunningCheck(false);
+    }
+  };
+
   const filteredRuns = runs.filter(r => {
     if (statusFilter === 'all') return true;
     return r.status === statusFilter;
@@ -33,23 +72,108 @@ export const RunsPage: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       {/* Page Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1>Pipeline Execution Runs</h1>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
+            Pipeline Execution Runs
+          </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '6px', fontSize: '14px' }}>
             Complete audit log of every automated fetch and check job stored in the <code className="mono">fetch_runs</code> table.
           </p>
         </div>
 
-        <button
-          onClick={fetchRunsData}
-          className="btn btn-secondary"
-          style={{ padding: '8px 14px' }}
-        >
-          <RefreshCw size={14} />
-          Refresh Runs
-        </button>
+        {/* Action Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Framework Selector */}
+          <select
+            value={selectedSlug}
+            onChange={(e) => setSelectedSlug(e.target.value)}
+            disabled={isRunningCheck}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--bg-input)',
+              border: '1px solid var(--border-card)',
+              color: 'var(--text-primary)',
+              fontSize: '13px',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="">All Enabled Frameworks</option>
+            {frameworks.map((fw) => (
+              <option key={fw.slug} value={fw.slug}>
+                {fw.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Run Manual Check Button */}
+          <button
+            onClick={handleRunManualCheck}
+            disabled={isRunningCheck}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              backgroundColor: isRunningCheck ? 'var(--bg-hover)' : 'var(--accent-primary)',
+              color: '#FFFFFF',
+              border: 'none',
+              fontWeight: 600,
+              fontSize: '13px',
+              cursor: isRunningCheck ? 'not-allowed' : 'pointer',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)',
+            }}
+          >
+            {isRunningCheck ? (
+              <>
+                <Loader2 size={15} className="spin" />
+                <span>Checking...</span>
+              </>
+            ) : (
+              <>
+                <Play size={14} fill="#FFFFFF" />
+                <span>Run Manual Check</span>
+              </>
+            )}
+          </button>
+
+          {/* Refresh Button */}
+          <button
+            onClick={fetchRunsData}
+            disabled={isRunningCheck}
+            className="btn btn-secondary"
+            style={{ padding: '8px 14px' }}
+          >
+            <RefreshCw size={14} />
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {/* Toast Feedback Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            padding: '12px 16px',
+            borderRadius: '10px',
+            backgroundColor: toastMessage.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            border: `1px solid ${toastMessage.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+            color: toastMessage.type === 'success' ? '#10B981' : '#EF4444',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontSize: '13px',
+            fontWeight: 500,
+          }}
+        >
+          {toastMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+          <span>{toastMessage.text}</span>
+        </div>
+      )}
 
       {/* Filter Chips */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

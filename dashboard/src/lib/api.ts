@@ -285,3 +285,18 @@ export async function getDashboardMetrics() {
     pipelineHealth: totalFrameworks > 0 ? Math.round((activeRuns / totalFrameworks) * 100) : 100,
   };
 }
+
+export async function triggerManualCheck(slug?: string): Promise<{ success: boolean; message?: string; error?: string }> {
+  try {
+    const res = await fetch('/api/run-pipeline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug: slug || '' }),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    console.error('Error triggering manual pipeline check:', err);
+    return { success: false, error: err.message || 'Failed to trigger pipeline' };
+  }
+}
