@@ -1,16 +1,14 @@
 import React from 'react';
-import { Search, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
-  searchQuery: string;
-  onSearchChange: (q: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
   isDark: boolean;
   onToggleTheme: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  searchQuery,
-  onSearchChange,
   isDark,
   onToggleTheme,
 }) => {
@@ -30,57 +28,10 @@ export const Header: React.FC<HeaderProps> = ({
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
       }}
     >
-      {/* Search Input with ⌘ K */}
-      <div style={{ position: 'relative', width: '420px', maxWidth: '60%' }}>
-        <Search
-          size={16}
-          color="var(--text-muted)"
-          style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
-        />
-        <input
-          type="text"
-          placeholder="Search frameworks, versions, or changes..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          style={{
-            width: '100%',
-            backgroundColor: 'var(--bg-input)',
-            border: '1px solid var(--border-card)',
-            borderRadius: '10px',
-            padding: '9px 44px 9px 38px',
-            color: 'var(--text-primary)',
-            fontSize: '13px',
-            outline: 'none',
-            transition: 'border-color 0.15s ease, background-color 0.2s ease, color 0.2s ease',
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = 'var(--accent-primary)';
-            e.currentTarget.style.boxShadow = '0 0 0 2px var(--accent-glow)';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = 'var(--border-card)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            right: '10px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'var(--bg-card-subtle)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '5px',
-            padding: '2px 6px',
-            fontSize: '10px',
-            color: 'var(--text-muted)',
-            fontFamily: 'monospace',
-            fontWeight: 600,
-            pointerEvents: 'none',
-          }}
-        >
-          ⌘ K
-        </div>
+      {/* Left indicator */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} />
+        <span style={{ fontWeight: 500 }}>Live Tracker Connected</span>
       </div>
 
       {/* Right Controls */}

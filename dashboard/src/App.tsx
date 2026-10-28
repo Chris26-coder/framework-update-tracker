@@ -179,10 +179,8 @@ export function App() {
           transition: 'background-color 0.2s ease',
         }}
       >
-        {/* Sticky Top Header matching Mockups */}
+        {/* Sticky Top Header */}
         <Header
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
           isDark={isDark}
           onToggleTheme={toggleTheme}
         />
